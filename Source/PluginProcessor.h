@@ -56,11 +56,9 @@ public:
 private:
 
 
-    //Oscillator variables
-    juce::dsp::Oscillator<float> osc{ [](float x) { return std::sin(x); } };
+    //Synth variables
 
-    juce::dsp::Gain<float> gain;
-
+    juce::Synthesiser synth;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FractalSynthesisAudioProcessor)

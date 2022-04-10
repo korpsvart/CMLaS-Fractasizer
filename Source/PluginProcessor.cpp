@@ -8,6 +8,8 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "SynthSound.h"
+#include "SynthVoice.h"
 
 //==============================================================================
 FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
@@ -22,6 +24,9 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
                        )
 #endif
 {
+
+    synth.addSound(new SynthSound());
+    synth.addVoice(new SynthVoice());
 }
 
 FractalSynthesisAudioProcessor::~FractalSynthesisAudioProcessor()
@@ -97,17 +102,19 @@ void FractalSynthesisAudioProcessor::prepareToPlay (double sampleRate, int sampl
     // initialisation that you need..
 
 
-    //Prepare oscillator (passing ProcessSpec)
-    juce::dsp::ProcessSpec spec;
-    spec.maximumBlockSize = samplesPerBlock;
-    spec.sampleRate = sampleRate;
-    spec.numChannels = getTotalNumOutputChannels();
+    for (int i = 0; i < synth.getNumVoices(); i++)
+    {
+        if (auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(i)))
+        {
+            voice->prepareToPlay(sampleRate, samplesPerBlock, getTotalNumOutputChannels());
+        }
 
-    osc.prepare(spec);
-    gain.prepare(spec);
+    }
 
-    osc.setFrequency(440);
-    gain.setGainLinear(0.01f);
+
+
+
+    synth.setCurrentPlaybackSampleRate(sampleRate);
 }
 
 void FractalSynthesisAudioProcessor::releaseResources()
@@ -158,10 +165,17 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         buffer.clear (i, 0, buffer.getNumSamples());
 
 
-    juce::dsp::AudioBlock<float> audioBlock{ buffer };
+    for (int i = 0; i < synth.getNumVoices(); ++i)
+    {
+        if (auto voice = dynamic_cast<juce::SynthesiserVoice*>(synth.getVoice(i)))
+        {
+            // Osc controls
+            // ADSR
+            // LFO ecc...
+        }
+    }
 
-    osc.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
-    gain.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
+    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
 }
 
