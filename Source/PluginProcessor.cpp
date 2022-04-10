@@ -95,6 +95,19 @@ void FractalSynthesisAudioProcessor::prepareToPlay (double sampleRate, int sampl
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+
+
+    //Prepare oscillator (passing ProcessSpec)
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.sampleRate = sampleRate;
+    spec.numChannels = getTotalNumOutputChannels();
+
+    osc.prepare(spec);
+    gain.prepare(spec);
+
+    osc.setFrequency(440);
+    gain.setGainLinear(0.01f);
 }
 
 void FractalSynthesisAudioProcessor::releaseResources()
@@ -144,18 +157,12 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
 
-        // ..do something to the data...
-    }
+    juce::dsp::AudioBlock<float> audioBlock{ buffer };
+
+    osc.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
+    gain.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
+
 }
 
 //==============================================================================
