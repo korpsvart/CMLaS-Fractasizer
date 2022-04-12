@@ -32,12 +32,15 @@ public:
 
 private:
 
+    juce::ADSR adsr;
+    juce::ADSR::Parameters adsrParams;
+
 
     //Oscillator variables
     juce::dsp::Oscillator<float> osc{ [](float x) { return std::sin(x); } };
 
     juce::dsp::Gain<float> gain;
 
-    bool isPrepared;
+    bool isPrepared = false;
 
 };
