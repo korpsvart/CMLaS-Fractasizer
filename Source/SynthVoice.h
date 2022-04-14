@@ -34,6 +34,7 @@ private:
 
     juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;
+    juce::AudioBuffer<float> synthBuffer; //Local buffer to temporarily store synth output
 
 
     //Oscillator variables

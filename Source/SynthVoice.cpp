@@ -25,6 +25,9 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
 void SynthVoice::stopNote(float velocity, bool allowTailOff)
 {
     adsr.noteOff();
+
+    if (!allowTailOff || !adsr.isActive())
+        clearCurrentNote();
 }
 
 void SynthVoice::pitchWheelMoved(int newPitchWheelValue)
@@ -41,14 +44,37 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
     jassert(isPrepared);
 
 
-    //AudioBlock it's just an alias for the output buffer (so by modifying
+    if (!isVoiceActive())
+        return;
+
+
+    //Set the size for the local temp buffer (only re-allocate if needed)
+    synthBuffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
+    //clear the local temp buffer
+    synthBuffer.clear();
+
+
+
+
+    //AudioBlock it's just an alias for the given buffer needed by DSP classes (so by modifying
     //the AudioBlock we are actually modifying the given buffer)
-    juce::dsp::AudioBlock<float> audioBlock{ outputBuffer };
+    juce::dsp::AudioBlock<float> audioBlock{ synthBuffer };
 
     osc.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
     gain.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
 
-    adsr.applyEnvelopeToBuffer(outputBuffer, startSample, numSamples);
+    adsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
+
+    //Add the local temp buffer to the final audio output buffer
+
+    for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
+    {
+        outputBuffer.addFrom(channel, startSample, synthBuffer, channel, 0, numSamples);
+
+    }
+
+    if (!adsr.isActive())
+        clearCurrentNote();
 
 
 }
@@ -68,7 +94,6 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     osc.prepare(spec);
     gain.prepare(spec);
 
-    osc.setFrequency(440);
     gain.setGainLinear(0.01f);
 
     isPrepared = true;
