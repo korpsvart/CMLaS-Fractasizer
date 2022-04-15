@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 
+
 //==============================================================================
 /**
 */
@@ -59,7 +60,17 @@ private:
     //Synth variables
 
 
-    juce::Synthesiser synth;
+    //number of partials to generate for additive synthesis, will correspond to number of synths
+    //Can be changed during the execution (through the GUI)
+    int partialsNumber = 4;
+
+
+    //Define the number of polyphonies (max number of MIDI notes that can be played at the same time)
+    //Should be constant during the execution
+    const int voicesNumber = 4;
+
+    std::vector<juce::Synthesiser*> synths;
+
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FractalSynthesisAudioProcessor)

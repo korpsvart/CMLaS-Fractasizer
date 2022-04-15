@@ -16,6 +16,8 @@ class SynthVoice : public juce::SynthesiserVoice
 {
 public:
 
+    SynthVoice(float harmonicN);
+
     bool canPlaySound(juce::SynthesiserSound*) override;
 
     void startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* sound, int currentPitchWheelPosition) override;
@@ -30,6 +32,9 @@ public:
 
     void prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannelsNumber);
 
+    void setHarmonicN(float harmonicN);
+
+
 private:
 
     juce::ADSR adsr;
@@ -41,6 +46,9 @@ private:
     juce::dsp::Oscillator<float> osc{ [](float x) { return std::sin(x); } };
 
     juce::dsp::Gain<float> gain;
+
+
+    float harmonicN = 1; //Identifies the order of this oscillator harmonic (this will be multiplied by the given frequency)
 
     bool isPrepared = false;
 

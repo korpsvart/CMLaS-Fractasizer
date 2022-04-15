@@ -10,6 +10,12 @@
 
 #include "SynthVoice.h"
 
+
+SynthVoice::SynthVoice(float harmonicN)
+{
+    this->harmonicN = harmonicN;
+}
+
 bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound)
 {
     return dynamic_cast<juce::SynthesiserSound*>(sound) != nullptr;
@@ -17,7 +23,7 @@ bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound)
 
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* sound, int currentPitchWheelPosition)
 {
-    osc.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
+    osc.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber)*harmonicN);
     adsr.noteOn();
 
 }
@@ -97,4 +103,11 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     gain.setGainLinear(0.01f);
 
     isPrepared = true;
+}
+
+
+void SynthVoice::setHarmonicN(float harmonicN)
+{
+
+    this->harmonicN = harmonicN;
 }

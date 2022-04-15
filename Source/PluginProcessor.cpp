@@ -25,12 +25,34 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
 #endif
 {
 
-    synth.addSound(new SynthSound());
-    synth.addVoice(new SynthVoice());
+    //Create synth voices
+
+    //voicesNumber voices for each synth (allows voicesNumber MIDI notes to be played at the same time)
+    //First synth will play always the fundamental
+    //Second synth will play the 2nd harmonic and so on
+
+
+    //Create synths
+
+    for (size_t order = 0; order < partialsNumber; order++)
+    {
+        juce::Synthesiser* synth = new juce::Synthesiser(); //create synth
+        synth->addSound(new SynthSound()); //add SynthSound (only one)
+        //Add 4 voices at same harmonic order (order+1)
+        for (size_t voice = 0; voice < voicesNumber; voice++)
+        {
+            synth->addVoice(new SynthVoice(order+1));
+        }
+        synths.push_back(synth); //Add current synth
+    }
+
+    //TODO: refactoring to correctly free memory
+
 }
 
 FractalSynthesisAudioProcessor::~FractalSynthesisAudioProcessor()
 {
+
 }
 
 //==============================================================================
@@ -102,19 +124,22 @@ void FractalSynthesisAudioProcessor::prepareToPlay (double sampleRate, int sampl
     // initialisation that you need..
 
 
-    for (int i = 0; i < synth.getNumVoices(); i++)
-    {
-        if (auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(i)))
-        {
-            voice->prepareToPlay(sampleRate, samplesPerBlock, getTotalNumOutputChannels());
-        }
 
+    for (juce::Synthesiser* synth: synths)
+    {
+        for (int i = 0; i < synth->getNumVoices(); i++)
+        {
+            if (auto voice = dynamic_cast<SynthVoice*>(synth->getVoice(i)))
+            {
+                voice->prepareToPlay(sampleRate, samplesPerBlock, getTotalNumOutputChannels());
+            }
+
+        }
+        synth->setCurrentPlaybackSampleRate(sampleRate);
     }
 
 
 
-
-    synth.setCurrentPlaybackSampleRate(sampleRate);
 }
 
 void FractalSynthesisAudioProcessor::releaseResources()
@@ -165,17 +190,22 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         buffer.clear (i, 0, buffer.getNumSamples());
 
 
-    for (int i = 0; i < synth.getNumVoices(); ++i)
+
+
+    for (juce::Synthesiser* synth : synths)
     {
-        if (auto voice = dynamic_cast<juce::SynthesiserVoice*>(synth.getVoice(i)))
+        for (int i = 0; i < synth->getNumVoices(); ++i)
         {
-            // Osc controls
-            // ADSR
-            // LFO ecc...
+            if (auto voice = dynamic_cast<juce::SynthesiserVoice*>(synth->getVoice(i)))
+            {
+                // Osc controls
+                // ADSR
+                // LFO ecc...
+            }
         }
+        synth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     }
 
-    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
 }
 
