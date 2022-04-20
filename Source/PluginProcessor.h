@@ -84,6 +84,11 @@ private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParams();
 
 
+    std::complex<double> mandelbrot(std::complex<double> z, std::complex<double> c);
+
+    std::complex<double> burningShip(std::complex<double> z, std::complex<double> c);
+
+
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FractalSynthesisAudioProcessor)

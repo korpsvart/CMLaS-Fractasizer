@@ -242,6 +242,27 @@ void FractalSynthesisAudioProcessor::setStateInformation (const void* data, int 
 void FractalSynthesisAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue)
 {
     //Here we update the values of the synths based on the selected fractal function
+
+
+
+    if (strcmp(parameterID.toRawUTF8(), "FRACTAL_FUNCTION"))
+    {
+        int fractalOption = newValue;
+
+        switch (fractalOption)
+        {
+        case 0:
+
+            break;
+        case 1:
+
+            break;
+        default:
+            break;
+        }
+
+
+    }
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcessor::createParams()
@@ -251,7 +272,22 @@ juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcess
     params.push_back(std::make_unique<juce::AudioParameterChoice>("FRACTAL_FUNCTION", "Fractal Function",
         juce::StringArray("Mandelbrot Set", "Burning Ship Set"), 0));
 
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("INITIAL_POINT_X", "Initial Point X", 0.1, 1, 0.5));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("INITIAL_POINT_Y", "Initial Point Y", 0.1, 1, 0.5));
+
     return { params.begin(), params.end() };
+}
+
+std::complex<double> FractalSynthesisAudioProcessor::mandelbrot(std::complex<double> z, std::complex<double> c)
+{
+    return std::pow(z, 2) + c;
+}
+
+std::complex<double> FractalSynthesisAudioProcessor::burningShip(std::complex<double> z, std::complex<double> c)
+{
+    std::complex<double> z1(std::abs(z.real()), std::abs(z.imag()));
+    return std::pow(z1, 2) + c;
 }
 
 

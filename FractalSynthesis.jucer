@@ -5,6 +5,8 @@
               pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="Io9bwR" name="FractalSynthesis">
     <GROUP id="{7B01FA21-3F7E-DBB8-7C1E-01690869462C}" name="Source">
+      <FILE id="cNNL7V" name="InputPlane.cpp" compile="1" resource="0" file="Source/InputPlane.cpp"/>
+      <FILE id="QkoYvu" name="InputPlane.h" compile="0" resource="0" file="Source/InputPlane.h"/>
       <FILE id="j4F8We" name="SynthVoice.cpp" compile="1" resource="0" file="Source/SynthVoice.cpp"/>
       <FILE id="gGpb4n" name="SynthSound.h" compile="0" resource="0" file="Source/SynthSound.h"/>
       <FILE id="lPcYBP" name="SynthVoice.h" compile="0" resource="0" file="Source/SynthVoice.h"/>

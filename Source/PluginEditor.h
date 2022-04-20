@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "InputPlane.h"
 
 //==============================================================================
 /**
@@ -35,8 +36,16 @@ private:
     //Buttons, combobox, sliders...
     juce::ComboBox fractalFunctionComboBox;
 
+    juce::Slider initialPointXSlider;
+    juce::Slider initialPointYSlider;
+
+    InputPlane inputPlaneComponent;
+
     //Attachments (must be declared after the GUI elements to avoid crashes when closing the plugin)
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> fractalComboBoxAttachment;
+
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderInitialPointXAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderInitialPointYAttachment;
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FractalSynthesisAudioProcessorEditor)
