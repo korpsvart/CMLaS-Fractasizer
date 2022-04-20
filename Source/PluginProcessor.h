@@ -14,7 +14,7 @@
 //==============================================================================
 /**
 */
-class FractalSynthesisAudioProcessor : public juce::AudioProcessor
+class FractalSynthesisAudioProcessor : public juce::AudioProcessor, juce::AudioProcessorValueTreeState::Listener
 {
 public:
     //==============================================================================
@@ -54,6 +54,14 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
+
+    void parameterChanged(const juce::String& parameterID, float newValue) override;
+
+
+    juce::AudioProcessorValueTreeState apvts;
+
+
+
 private:
 
 
@@ -70,6 +78,11 @@ private:
     const int voicesNumber = 4;
 
     std::vector<juce::Synthesiser*> synths;
+
+
+
+    juce::AudioProcessorValueTreeState::ParameterLayout createParams();
+
 
 
     //==============================================================================

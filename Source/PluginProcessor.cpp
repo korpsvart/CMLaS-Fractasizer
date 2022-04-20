@@ -21,7 +21,7 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ), apvts (*this, nullptr, "Parameters", FractalSynthesisAudioProcessor::createParams())
 #endif
 {
 
@@ -47,6 +47,11 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
     }
 
     //TODO: refactoring to correctly free memory
+
+
+    //Add this as listener to the choice param
+    apvts.addParameterListener("FRACTAL_FUNCTION", this);
+
 
 }
 
@@ -233,6 +238,22 @@ void FractalSynthesisAudioProcessor::setStateInformation (const void* data, int 
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
+
+void FractalSynthesisAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue)
+{
+    //Here we update the values of the synths based on the selected fractal function
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcessor::createParams()
+{
+    std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("FRACTAL_FUNCTION", "Fractal Function",
+        juce::StringArray("Mandelbrot Set", "Burning Ship Set"), 0));
+
+    return { params.begin(), params.end() };
+}
+
 
 //==============================================================================
 // This creates new instances of the plugin..
