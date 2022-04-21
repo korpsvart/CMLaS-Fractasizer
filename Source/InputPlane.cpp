@@ -14,7 +14,8 @@
 InputPlane::InputPlane(juce::Slider& sliderX, juce::Slider& sliderY) : sliderX(sliderX), sliderY(sliderY)
 {
 
-    //addMouseListener(this,true);
+    sliderX.addListener(this);
+    sliderY.addListener(this);
 
 }
 
@@ -26,9 +27,8 @@ void InputPlane::paint(juce::Graphics& g)
 
     g.fillAll(juce::Colour::fromRGB(0, 0, 0));
 
-
     g.setColour(juce::Colours::aliceblue);
-    g.drawEllipse(currentX*area.getWidth(), (1-currentY) * area.getHeight(), 5, 5, 1);
+    g.drawEllipse(sliderX.getValue() * area.getWidth(), (1 - sliderY.getValue()) * area.getHeight(), 5, 5, 1);
 
 
 }
@@ -50,13 +50,12 @@ void InputPlane::mouseDown(const juce::MouseEvent& event)
     sliderX.setValue(x);
     sliderY.setValue(y);
 
-    currentX = x;
-    currentY = y;
-
     repaint();
 
+}
 
-
-
+void InputPlane::sliderValueChanged(juce::Slider* slider)
+{
+    repaint();
 }
 

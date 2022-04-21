@@ -13,7 +13,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-class InputPlane : public juce::Component
+class InputPlane : public juce::Component, juce::Slider::Listener
 {
 public:
     InputPlane(juce::Slider& sliderX, juce::Slider& sliderY);
@@ -22,6 +22,8 @@ public:
     void resized() override;
 
     void mouseDown(const juce::MouseEvent& event) override;
+
+    void sliderValueChanged(juce::Slider* slider);
 
 private:
 
