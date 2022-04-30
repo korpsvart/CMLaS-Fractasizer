@@ -49,8 +49,16 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
     //TODO: refactoring to correctly free memory
 
 
-    //Add this as listener to the choice param
+    //Add this as listener to the fractal params
+    //(usually this is not needed when working with attachments,
+    //but for performance reasons we don't want to recompute
+    //the fractal succession all the time)
     apvts.addParameterListener("FRACTAL_FUNCTION", this);
+
+    apvts.addParameterListener("INITIAL_POINT_X", this);
+
+    apvts.addParameterListener("INITIAL_POINT_Y", this);
+
 
 
 }
@@ -195,22 +203,48 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         buffer.clear (i, 0, buffer.getNumSamples());
 
 
+    std::complex<double> z = 0; //starting z
 
+    //Get the starting point for the fractal
+    auto& startingX = *apvts.getRawParameterValue("INITIAL_POINT_X");
+    auto& startingY = *apvts.getRawParameterValue("INITIAL_POINT_Y");
+
+    float x = startingX.load();
+    float y = startingY.load();
 
     for (juce::Synthesiser* synth : synths)
     {
-        for (int i = 0; i < synth->getNumVoices(); ++i)
+
+        if (updatedFractal)
         {
-            if (auto voice = dynamic_cast<juce::SynthesiserVoice*>(synth->getVoice(i)))
+            z = currentFractal(z, std::complex<double>(x, y));
+            //Do something with z on all the voices of this synth
+            for (int i = 0; i < synth->getNumVoices(); ++i)
             {
-                // Osc controls
-                // ADSR
-                // LFO ecc...
+
+
+                if (auto voice = dynamic_cast<SynthVoice*>(synth->getVoice(i)))
+                {
+                    // Osc controls
+                    // ADSR
+                    // LFO ecc...
+
+
+                    //As an example, use X to control frequency detune and Y to control amplitude
+
+                    //Of course we need to take the absolute value if we use it to control frequency detuning or amplitude
+                    voice->setHarmonicN(std::abs(z.real()));
+
+                }
             }
         }
+  
         synth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     }
 
+    updatedFractal = false;
+
+    midiMessages.clear();
 
 }
 
@@ -245,23 +279,27 @@ void FractalSynthesisAudioProcessor::parameterChanged(const juce::String& parame
 
 
 
-    if (strcmp(parameterID.toRawUTF8(), "FRACTAL_FUNCTION"))
+    if (parameterID.compare("FRACTAL_FUNCTION"))
     {
         int fractalOption = newValue;
 
         switch (fractalOption)
         {
         case 0:
-
+            currentFractal = mandelbrot;
             break;
         case 1:
-
+            currentFractal = burningShip;
             break;
         default:
             break;
         }
 
-
+        updatedFractal = true;
+    }
+    else if (parameterID.compare("INITIAL_POINT_X") || parameterID.compare("INITIAL_POINT_Y"))
+    {
+        updatedFractal = true;
     }
 }
 
@@ -289,6 +327,23 @@ std::complex<double> FractalSynthesisAudioProcessor::burningShip(std::complex<do
     std::complex<double> z1(std::abs(z.real()), std::abs(z.imag()));
     return std::pow(z1, 2) + c;
 }
+
+
+
+void FractalSynthesisAudioProcessor::generateFractalSuccession(std::complex<double>(*fractalFunction)(std::complex<double> z, std::complex<double> c), std::complex<double> c)
+{
+
+    std::complex<double> z = 0; //starting z
+
+    for (size_t synthNumber = 0; synthNumber < partialsNumber; synthNumber++)
+    {
+        z = fractalFunction(z, c);
+        //Set a param of the synth
+    }
+}
+
+
+
 
 
 //==============================================================================

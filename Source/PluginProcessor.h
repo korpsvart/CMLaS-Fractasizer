@@ -84,9 +84,15 @@ private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParams();
 
 
-    std::complex<double> mandelbrot(std::complex<double> z, std::complex<double> c);
+    static std::complex<double> mandelbrot(std::complex<double> z, std::complex<double> c);
 
-    std::complex<double> burningShip(std::complex<double> z, std::complex<double> c);
+    static std::complex<double> burningShip(std::complex<double> z, std::complex<double> c);
+
+    std::complex<double>(*currentFractal)(std::complex<double> z, std::complex<double> c);
+
+    void generateFractalSuccession(std::complex<double>(*fractalFunction)(std::complex<double> z, std::complex<double> c), std::complex<double> c);
+
+    bool updatedFractal = false;
 
 
 
