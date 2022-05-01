@@ -65,7 +65,8 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
 
 FractalSynthesisAudioProcessor::~FractalSynthesisAudioProcessor()
 {
-
+    synths.clear();
+    
 }
 
 //==============================================================================
@@ -161,11 +162,11 @@ void FractalSynthesisAudioProcessor::releaseResources()
     // spare memory, etc.
     for (juce::Synthesiser* synth: synths)
     {
-        for (int i=0; i < synth->getNumVoices(); i++){
-            synth->removeVoice(i);
-        }
-        delete synth;
+        synth->clearSounds();
+        synth->clearVoices();
     }
+  
+    
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations

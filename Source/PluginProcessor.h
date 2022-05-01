@@ -79,8 +79,6 @@ private:
 
     std::vector<juce::Synthesiser*> synths;
 
-
-
     juce::AudioProcessorValueTreeState::ParameterLayout createParams();
 
 

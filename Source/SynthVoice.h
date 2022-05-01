@@ -17,6 +17,7 @@ class SynthVoice : public juce::SynthesiserVoice
 public:
 
     SynthVoice(float harmonicN);
+    
 
     bool canPlaySound(juce::SynthesiserSound*) override;
 
