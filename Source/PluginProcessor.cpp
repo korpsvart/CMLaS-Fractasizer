@@ -159,6 +159,13 @@ void FractalSynthesisAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
+    for (juce::Synthesiser* synth: synths)
+    {
+        for (int i=0; i < synth->getNumVoices(); i++){
+            synth->removeVoice(i);
+        }
+        delete synth;
+    }
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
