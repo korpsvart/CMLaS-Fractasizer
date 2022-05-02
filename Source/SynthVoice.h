@@ -35,6 +35,10 @@ public:
 
     void setHarmonicN(float harmonicN);
 
+    void setGain(float gainValue);
+
+    void setPan(float panValue);
+
 
 private:
 
@@ -47,6 +51,8 @@ private:
     juce::dsp::Oscillator<float> osc{ [](float x) { return std::sin(x); } };
 
     juce::dsp::Gain<float> gain;
+
+    juce::dsp::Panner<float> panner;
 
 
     float harmonicN = 1; //Identifies the order of this oscillator harmonic (this will be multiplied by the given frequency)

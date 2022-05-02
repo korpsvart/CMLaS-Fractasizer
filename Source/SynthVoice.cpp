@@ -68,6 +68,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
 
     osc.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
     gain.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
+    panner.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
 
     adsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
 
@@ -99,8 +100,8 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 
     osc.prepare(spec);
     gain.prepare(spec);
+    panner.prepare(spec);
 
-    gain.setGainLinear(0.01f);
 
     isPrepared = true;
 }
@@ -110,4 +111,15 @@ void SynthVoice::setHarmonicN(float harmonicN)
 {
 
     this->harmonicN = harmonicN;
+}
+
+void SynthVoice::setGain(float gainValue)
+{
+
+    gain.setGainLinear(gainValue);
+}
+
+void SynthVoice::setPan(float panValue)
+{
+    panner.setPan(panValue);
 }

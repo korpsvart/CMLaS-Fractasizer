@@ -213,20 +213,25 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
     std::complex<double> z = 0; //starting z
 
-    //Get the starting point for the fractal
-    auto& startingX = *apvts.getRawParameterValue("INITIAL_POINT_X");
-    auto& startingY = *apvts.getRawParameterValue("INITIAL_POINT_Y");
+    if (updatedFractal)
+    {
+        //Get the starting point for the fractal
+        auto& startingX = *apvts.getRawParameterValue("INITIAL_POINT_X");
+        auto& startingY = *apvts.getRawParameterValue("INITIAL_POINT_Y");
 
-    float x = startingX.load();
-    float y = startingY.load();
+        float x = startingX.load();
+        float y = startingY.load();
 
-    for (juce::Synthesiser* synth : synths)
+        generateFractalSuccession(std::complex<double>(x, y));
+
+        updatedFractal = false;
+    }
+
+    for (int n = 0; n < synths.size(); n++)
     {
 
-        if (updatedFractal)
-        {
-            z = currentFractal(z, std::complex<double>(x, y));
-            //Do something with z on all the voices of this synth
+        juce::Synthesiser* synth = synths.at(n);
+
             for (int i = 0; i < synth->getNumVoices(); ++i)
             {
 
@@ -241,16 +246,16 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     //As an example, use X to control frequency detune and Y to control amplitude
 
                     //Of course we need to take the absolute value if we use it to control frequency detuning or amplitude
-                    voice->setHarmonicN(std::abs(z.real()));
 
+                    //get the n-th element of the fractal generated succession
+                    auto fractalPoint = fractalPoints[n];
+                    voice->setGain(std::abs(fractalPoint.real())/5);
+                    voice->setPan(fractalPoint.imag()/20);
                 }
             }
-        }
   
         synth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     }
-
-    updatedFractal = false;
 
     midiMessages.clear();
 
@@ -338,15 +343,15 @@ std::complex<double> FractalSynthesisAudioProcessor::burningShip(std::complex<do
 
 
 
-void FractalSynthesisAudioProcessor::generateFractalSuccession(std::complex<double>(*fractalFunction)(std::complex<double> z, std::complex<double> c), std::complex<double> c)
+void FractalSynthesisAudioProcessor::generateFractalSuccession(std::complex<double> c)
 {
 
     std::complex<double> z = 0; //starting z
 
     for (size_t synthNumber = 0; synthNumber < partialsNumber; synthNumber++)
     {
-        z = fractalFunction(z, c);
-        //Set a param of the synth
+        z = currentFractal(z, c);
+        fractalPoints[synthNumber] = z;
     }
 }
 

@@ -69,15 +69,16 @@ private:
 
 
     //number of partials to generate for additive synthesis, will correspond to number of synths
-    //Can be changed during the execution (through the GUI)
-    int partialsNumber = 4;
+    static const int partialsNumber = 4;
 
 
     //Define the number of polyphonies (max number of MIDI notes that can be played at the same time)
     //Should be constant during the execution
-    const int voicesNumber = 4;
+    static const int voicesNumber = 4;
 
     std::vector<juce::Synthesiser*> synths;
+
+    std::array<std::complex<double>,partialsNumber> fractalPoints; //to store the fractal points
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParams();
 
@@ -86,11 +87,11 @@ private:
 
     static std::complex<double> burningShip(std::complex<double> z, std::complex<double> c);
 
-    std::complex<double>(*currentFractal)(std::complex<double> z, std::complex<double> c);
+    std::complex<double>(*currentFractal)(std::complex<double> z, std::complex<double> c) = mandelbrot;
 
-    void generateFractalSuccession(std::complex<double>(*fractalFunction)(std::complex<double> z, std::complex<double> c), std::complex<double> c);
+    void generateFractalSuccession(std::complex<double> c);
 
-    bool updatedFractal = false;
+    bool updatedFractal = true;
 
 
 
