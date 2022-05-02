@@ -224,6 +224,8 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
         generateFractalSuccession(std::complex<double>(x, y));
 
+        generateGains(fractalPoints);
+
         updatedFractal = false;
     }
 
@@ -248,9 +250,11 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     //Of course we need to take the absolute value if we use it to control frequency detuning or amplitude
 
                     //get the n-th element of the fractal generated succession
-                    auto fractalPoint = fractalPoints[n];
-                    voice->setGain(std::abs(fractalPoint.real())/5);
-                    voice->setPan(fractalPoint.imag()/20);
+                    double gain = gains[n];
+                    voice->setGain(gain);
+                    if (n > 0)
+                        voice->setHarmonicN(std::abs(fractalPoints[n].imag())/10);
+                    //voice->setPan(fractalPoint.imag()/20);
                 }
             }
   
@@ -292,7 +296,7 @@ void FractalSynthesisAudioProcessor::parameterChanged(const juce::String& parame
 
 
 
-    if (parameterID.compare("FRACTAL_FUNCTION"))
+    if (parameterID.compare("FRACTAL_FUNCTION")==0)
     {
         int fractalOption = newValue;
 
@@ -310,7 +314,7 @@ void FractalSynthesisAudioProcessor::parameterChanged(const juce::String& parame
 
         updatedFractal = true;
     }
-    else if (parameterID.compare("INITIAL_POINT_X") || parameterID.compare("INITIAL_POINT_Y"))
+    else if (parameterID.compare("INITIAL_POINT_X")==0 || parameterID.compare("INITIAL_POINT_Y")==0)
     {
         updatedFractal = true;
     }
@@ -353,6 +357,22 @@ void FractalSynthesisAudioProcessor::generateFractalSuccession(std::complex<doub
         z = currentFractal(z, c);
         fractalPoints[synthNumber] = z;
     }
+}
+
+void FractalSynthesisAudioProcessor::generateGains(std::vector<std::complex<double>> fractalSuccession)
+{
+
+    double total = 0;
+
+    for (auto& fractalPoint : fractalSuccession)
+            total += std::abs(fractalPoint.real());
+
+    for (size_t i = 0; i < fractalSuccession.size(); i++)
+    {
+        gains[i] = std::abs(fractalSuccession[i].real()) / total;
+    }
+
+
 }
 
 
