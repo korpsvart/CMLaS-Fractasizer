@@ -338,6 +338,17 @@ juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcess
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>("INITIAL_POINT_Y", "Initial Point Y", 0.1, 1, 0.5));
 
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK", "Attack", 0.1, 1, 0.5));
+    
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("SUSTAIN", "Sustain", 0.1, 1, 0.5));
+    
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release", 0.1, 1, 0.5));
+    
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY", "Decay", 0.1, 1, 0.5));
+    
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("NUM_PARTIALS", "Number of partials", 0.1, 1, 0.5));
+
+
     return { params.begin(), params.end() };
 }
 

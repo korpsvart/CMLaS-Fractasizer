@@ -17,14 +17,12 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
-
-
-    setSize(400, 300);
+    setSize(600, 400);
 
 
     fractalFunctionComboBox.addItem("Mandelbrot Set", 1);
     fractalFunctionComboBox.addItem("Burning Ship Set", 2);
-
+    
 
 
 
@@ -35,7 +33,37 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
 
 
     sliderInitialPointYAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "INITIAL_POINT_Y", initialPointYSlider);
+    
+    attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "ATTACK", attackSlider);
+    
+    sustainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "SUSTAIN", sustainSlider);
+    
+    decayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "DECAY", decaySlider);
+    
+    releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RELEASE", releaseSlider);
+    
+    numPartialsAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "NUM_PARTIALS", numPartialsSlider);
 
+    auto mandelbrotImage = juce::ImageCache::getFromMemory(BinaryData::Mandelbrot_png, BinaryData::Mandelbrot_pngSize);
+    auto burningShipImage = juce::ImageCache::getFromMemory(BinaryData::burningShip_png, BinaryData::burningShip_pngSize);
+    
+    std::cout << audioProcessor.apvts.getParameter("FRACTAL_FUNCTION")->getParameterIndex();
+   
+    // still have to figure out how to change the image when the combo box changes, for now we show the mandelbrot image
+    if (!(mandelbrotImage.isNull() || burningShipImage.isNull())) {
+        if (true)
+            mImageComponent.setImage(mandelbrotImage, juce::RectanglePlacement::stretchToFit);
+        else
+            mImageComponent.setImage(burningShipImage, juce::RectanglePlacement::stretchToFit);
+    }
+    else
+        jassert(!(mandelbrotImage.isNull() || burningShipImage.isNull()));
+
+    
+    
+    
+    addAndMakeVisible(mImageComponent);
+    
     addAndMakeVisible(fractalFunctionComboBox);
 
     addAndMakeVisible(inputPlaneComponent);
@@ -43,6 +71,16 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     addAndMakeVisible(initialPointXSlider);
 
     addAndMakeVisible(initialPointYSlider);
+    
+    addAndMakeVisible(attackSlider);
+    
+    addAndMakeVisible(sustainSlider);
+    
+    addAndMakeVisible(decaySlider);
+    
+    addAndMakeVisible(releaseSlider);
+    
+    addAndMakeVisible(numPartialsSlider);
 
 
 
@@ -66,16 +104,41 @@ void FractalSynthesisAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
 
-    auto bounds = getLocalBounds().reduced(50);
+    auto bounds = getLocalBounds().reduced(20);
 
-    fractalFunctionComboBox.setBounds(bounds.removeFromLeft(bounds.getWidth()/2));
-    inputPlaneComponent.setBounds(bounds.removeFromTop(bounds.getHeight() / 2));
+    auto upperArea = bounds.removeFromTop(bounds.getHeight()/2);
+    fractalFunctionComboBox.setBounds(upperArea.removeFromLeft(upperArea.getWidth()/3).reduced(5));
+    inputPlaneComponent.setBounds(upperArea.removeFromLeft(upperArea.getWidth()/2).reduced(5));
+   
+    initialPointXSlider.setBounds(upperArea.removeFromTop(upperArea.getHeight()/2).reduced(5));
+    initialPointYSlider.setBounds(upperArea.reduced(5));
+    
+    auto adsrAreaUpper = bounds.removeFromRight(bounds.getWidth()/2);
+    auto adsrAreaLower = adsrAreaUpper.removeFromBottom(adsrAreaUpper.getHeight()/2);
+    
+    attackSlider.setSliderStyle(juce::Slider::Rotary);
+    //attackSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
+    //attackSlider.setTitle("Attack");
+    
+    sustainSlider.setSliderStyle(juce::Slider::Rotary);
+    //sustainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, sustainSlider.getY(),sustainSlider.getX());
+    //sustainSlider.setTitle("Sustain");
+    
+    decaySlider.setSliderStyle(juce::Slider::Rotary);
+    //decaySlider.setTitle("Decay");
+    releaseSlider.setSliderStyle(juce::Slider::Rotary);
+    numPartialsSlider.setSliderStyle(juce::Slider::Rotary);
+    
+    releaseSlider.setBounds(adsrAreaLower.removeFromRight(adsrAreaLower.getWidth()/2).reduced(5));
+    decaySlider.setBounds(adsrAreaLower.reduced(5));
+    sustainSlider.setBounds(adsrAreaUpper.removeFromRight(adsrAreaUpper.getWidth()/2).reduced(5));
+    attackSlider.setBounds(adsrAreaUpper.reduced(5));
+    
+    numPartialsSlider.setBounds(bounds.removeFromRight(bounds.getWidth()/2).reduced(5));
+    
+    mImageComponent.setBounds(bounds.reduced(5));
 
-
-    initialPointXSlider.setBounds(bounds.removeFromTop(bounds.getHeight() / 2));
-    initialPointYSlider.setBounds(bounds);
-
-
+    
 
 
 }
