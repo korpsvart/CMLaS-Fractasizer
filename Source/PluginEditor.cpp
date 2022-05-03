@@ -44,22 +44,19 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     
     numPartialsAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "NUM_PARTIALS", numPartialsSlider);
 
-    auto mandelbrotImage = juce::ImageCache::getFromMemory(BinaryData::Mandelbrot_png, BinaryData::Mandelbrot_pngSize);
-    auto burningShipImage = juce::ImageCache::getFromMemory(BinaryData::burningShip_png, BinaryData::burningShip_pngSize);
+    mandelbrotImage = juce::ImageCache::getFromMemory(BinaryData::Mandelbrot_png, BinaryData::Mandelbrot_pngSize);
+    burningShipImage = juce::ImageCache::getFromMemory(BinaryData::burningShip_png, BinaryData::burningShip_pngSize);
     
     std::cout << audioProcessor.apvts.getParameter("FRACTAL_FUNCTION")->getParameterIndex();
    
     // still have to figure out how to change the image when the combo box changes, for now we show the mandelbrot image
     if (!(mandelbrotImage.isNull() || burningShipImage.isNull())) {
-        if (true)
-            mImageComponent.setImage(mandelbrotImage, juce::RectanglePlacement::stretchToFit);
-        else
-            mImageComponent.setImage(burningShipImage, juce::RectanglePlacement::stretchToFit);
+        mImageComponent.setImage(mandelbrotImage, juce::RectanglePlacement::stretchToFit);
     }
     else
         jassert(!(mandelbrotImage.isNull() || burningShipImage.isNull()));
 
-    
+    fractalFunctionComboBox.addListener(this);
     
     
     addAndMakeVisible(mImageComponent);
@@ -117,16 +114,30 @@ void FractalSynthesisAudioProcessorEditor::resized()
     auto adsrAreaLower = adsrAreaUpper.removeFromBottom(adsrAreaUpper.getHeight()/2);
     
     attackSlider.setSliderStyle(juce::Slider::Rotary);
-    //attackSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
-    //attackSlider.setTitle("Attack");
+    //attackSlider.setRotaryParameters(this juce::Slider::RotaryHorizontalVerticalDrag));
+    attackSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+    attackSlider.setPopupDisplayEnabled(true, true, this);
+    attackSlider.setTextValueSuffix("Attack");
+
+
     
     sustainSlider.setSliderStyle(juce::Slider::Rotary);
     //sustainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, sustainSlider.getY(),sustainSlider.getX());
-    //sustainSlider.setTitle("Sustain");
+    sustainSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+    sustainSlider.setPopupDisplayEnabled(true, true, this);
+    sustainSlider.setTextValueSuffix("Sustain");
     
     decaySlider.setSliderStyle(juce::Slider::Rotary);
+    decaySlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+    decaySlider.setPopupDisplayEnabled(true, true, this);
+    decaySlider.setTextValueSuffix("Decay");
+    
     //decaySlider.setTitle("Decay");
     releaseSlider.setSliderStyle(juce::Slider::Rotary);
+    releaseSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+    releaseSlider.setPopupDisplayEnabled(true, true, this);
+    releaseSlider.setTextValueSuffix("Release");
+    
     numPartialsSlider.setSliderStyle(juce::Slider::Rotary);
     
     releaseSlider.setBounds(adsrAreaLower.removeFromRight(adsrAreaLower.getWidth()/2).reduced(5));
@@ -138,8 +149,13 @@ void FractalSynthesisAudioProcessorEditor::resized()
     
     mImageComponent.setBounds(bounds.reduced(5));
 
-    
-
-
 }
 
+void FractalSynthesisAudioProcessorEditor::comboBoxChanged(juce::ComboBox* combo){
+    
+        if (combo->getSelectedId()==1)
+            mImageComponent.setImage(mandelbrotImage, juce::RectanglePlacement::stretchToFit);
+        else
+            mImageComponent.setImage(burningShipImage, juce::RectanglePlacement::stretchToFit);
+    
+}

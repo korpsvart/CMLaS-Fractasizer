@@ -15,7 +15,7 @@
 //==============================================================================
 /**
 */
-class FractalSynthesisAudioProcessorEditor  : public juce::AudioProcessorEditor
+class FractalSynthesisAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::ComboBox::Listener
 {
 public:
     FractalSynthesisAudioProcessorEditor (FractalSynthesisAudioProcessor&);
@@ -32,7 +32,12 @@ private:
     // access the processor object that created it.
     FractalSynthesisAudioProcessor& audioProcessor;
 
+    void comboBoxChanged(juce::ComboBox* combo) override;
     
+    juce::Image mandelbrotImage;
+    juce::Image burningShipImage;
+    
+
     //Buttons, combobox, sliders...
     juce::ComboBox fractalFunctionComboBox;
 
