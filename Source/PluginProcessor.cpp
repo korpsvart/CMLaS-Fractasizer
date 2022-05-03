@@ -212,6 +212,7 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
 
     std::complex<double> z = 0; //starting z
+    std::complex<double> c = 0; //starting point
 
     if (updatedFractal)
     {
@@ -219,10 +220,16 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         auto& startingX = *apvts.getRawParameterValue("INITIAL_POINT_X");
         auto& startingY = *apvts.getRawParameterValue("INITIAL_POINT_Y");
 
+
+
         float x = startingX.load();
         float y = startingY.load();
 
-        generateFractalSuccession(std::complex<double>(x, y));
+        c = std::complex<double>(x, y);
+
+
+
+        generateFractalSuccession(c);
 
         generateGains(fractalPoints);
 
@@ -253,7 +260,7 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     double gain = gains[n];
                     voice->setGain(gain);
                     if (n > 0)
-                        voice->setHarmonicN(std::abs(fractalPoints[n].imag())/10);
+                        voice->setHarmonicN(std::abs(fractalPoints[n].real()));
                     //voice->setPan(fractalPoint.imag()/20);
                 }
             }
@@ -365,11 +372,11 @@ void FractalSynthesisAudioProcessor::generateGains(std::vector<std::complex<doub
     double total = 0;
 
     for (auto& fractalPoint : fractalSuccession)
-            total += std::abs(fractalPoint.real());
+            total += std::abs(fractalPoint.imag());
 
     for (size_t i = 0; i < fractalSuccession.size(); i++)
     {
-        gains[i] = std::abs(fractalSuccession[i].real()) / total;
+        gains[i] = std::abs(fractalSuccession[i].imag()) / total;
     }
 
 
