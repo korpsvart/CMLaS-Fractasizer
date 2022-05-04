@@ -31,6 +31,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     setSliderStyle(releaseSlider);
 
 
+
     attackLabel.setText("Attack", juce::dontSendNotification);
     attackLabel.setJustificationType(juce::Justification::centred);
     attackLabel.attachToComponent(&attackSlider, false);
@@ -171,4 +172,6 @@ void FractalSynthesisAudioProcessorEditor::setSliderStyle(juce::Slider& slider)
     slider.setSliderStyle(juce::Slider::Rotary);
     slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
     slider.setPopupDisplayEnabled(true, true, this);
+    slider.setTextValueSuffix(" seconds");
+
 }
