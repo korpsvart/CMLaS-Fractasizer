@@ -251,6 +251,12 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     // ADSR
                     // LFO ecc...
 
+                    auto& attack = *apvts.getRawParameterValue("ATTACK");
+                    auto& decay = *apvts.getRawParameterValue("DECAY");
+                    auto& sustain = *apvts.getRawParameterValue("SUSTAIN");
+                    auto& release = *apvts.getRawParameterValue("RELEASE");
+
+                    voice->updateADSR(attack.load(), decay.load(), sustain.load(), release.load());
 
                     //As an example, use X to control frequency detune and Y to control amplitude
 
@@ -340,13 +346,18 @@ juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcess
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>("INITIAL_POINT_Y", "Initial Point Y", 0.1, 1, 0.5));
 
-    params.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK", "Attack", 0.1, 1, 0.5));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK", "Attack",
+        juce::NormalisableRange<float> {0.1f, 1.0f}, 0.1f));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY", "Decay",
+        juce::NormalisableRange<float> {0.1f, 1.0f}, 0.1f));
     
-    params.push_back(std::make_unique<juce::AudioParameterFloat>("SUSTAIN", "Sustain", 0.1, 1, 0.5));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("SUSTAIN", "Sustain",
+        juce::NormalisableRange<float> {0.1f, 1.0f}, 1.0f));
     
-    params.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release", 0.1, 1, 0.5));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release",
+        juce::NormalisableRange<float> {0.1f, 3.0f}, 0.4f));
     
-    params.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY", "Decay", 0.1, 1, 0.5));
     
     params.push_back(std::make_unique<juce::AudioParameterFloat>("NUM_PARTIALS", "Number of partials", 0.1, 1, 0.5));
 
