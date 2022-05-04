@@ -129,7 +129,7 @@ void FractalSynthesisAudioProcessorEditor::resized()
     initialPointXSlider.setBounds(upperArea.removeFromTop(upperArea.getHeight()/2).reduced(5));
     initialPointYSlider.setBounds(upperArea.reduced(5));
     
-    auto adsrAreaUpper = bounds.reduced(7);
+    auto adsrAreaUpper = bounds.reduced(9);
     auto adsrAreaLower = adsrAreaUpper.removeFromBottom(adsrAreaUpper.getHeight()/2);
     
     

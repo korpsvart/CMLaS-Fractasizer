@@ -347,7 +347,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcess
     params.push_back(std::make_unique<juce::AudioParameterFloat>("INITIAL_POINT_Y", "Initial Point Y", 0.1, 1, 0.5));
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK", "Attack",
-        juce::NormalisableRange<float> {0.1f, 1.0f}, 0.1f));
+        juce::NormalisableRange<float> {0.05f, 1.0f}, 0.05f));
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY", "Decay",
         juce::NormalisableRange<float> {0.1f, 1.0f}, 0.1f));
