@@ -27,6 +27,13 @@ public:
 
 private:
 
+
+    //Bounds for the input plane (actual "transformed" coordinates)
+    //(Assuming a square so the bounds are the same for x and y)
+    const float inputMax = 1;
+    const float inputMin = -1;
+    const float r = inputMax - inputMin;
+
     juce::Slider& sliderX;
     juce::Slider& sliderY;
 
