@@ -88,6 +88,8 @@ private:
     static std::complex<double> mandelbrot(std::complex<double> z, std::complex<double> c);
 
     static std::complex<double> burningShip(std::complex<double> z, std::complex<double> c);
+    
+    static std::complex<double> tricorn(std::complex<double> z, std::complex<double> c);
 
     std::complex<double>(*currentFractal)(std::complex<double> z, std::complex<double> c) = mandelbrot;
 

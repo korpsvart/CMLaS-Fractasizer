@@ -315,6 +315,8 @@ void FractalSynthesisAudioProcessor::parameterChanged(const juce::String& parame
         case 1:
             currentFractal = burningShip;
             break;
+        case 2:
+            currentFractal = tricorn;
         default:
             break;
         }
@@ -332,7 +334,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcess
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     params.push_back(std::make_unique<juce::AudioParameterChoice>("FRACTAL_FUNCTION", "Fractal Function",
-        juce::StringArray("Mandelbrot Set", "Burning Ship Set"), 0));
+        juce::StringArray("Mandelbrot Set", "Burning Ship Set", "Tricorn"), 0));
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>("INITIAL_POINT_X", "Initial Point X", 0.1, 1, 0.5));
 
@@ -363,6 +365,10 @@ std::complex<double> FractalSynthesisAudioProcessor::burningShip(std::complex<do
     return std::pow(z1, 2) + c;
 }
 
+std::complex<double> FractalSynthesisAudioProcessor::tricorn(std::complex<double> z, std::complex<double> c)
+{
+    return std::conj(pow(z, 2)) + c;
+}
 
 
 void FractalSynthesisAudioProcessor::generateFractalSuccession(std::complex<double> c)

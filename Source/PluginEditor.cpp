@@ -22,6 +22,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
 
     fractalFunctionComboBox.addItem("Mandelbrot Set", 1);
     fractalFunctionComboBox.addItem("Burning Ship Set", 2);
+    fractalFunctionComboBox.addItem("Tricorn", 3);
     
 
 
@@ -46,6 +47,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
 
     mandelbrotImage = juce::ImageCache::getFromMemory(BinaryData::Mandelbrot_png, BinaryData::Mandelbrot_pngSize);
     burningShipImage = juce::ImageCache::getFromMemory(BinaryData::burningShip_png, BinaryData::burningShip_pngSize);
+    tricornImage = juce::ImageCache::getFromMemory(BinaryData::tricorn_png, BinaryData::tricorn_pngSize);
     
     std::cout << audioProcessor.apvts.getParameter("FRACTAL_FUNCTION")->getParameterIndex();
    
@@ -54,7 +56,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
         mImageComponent.setImage(mandelbrotImage, juce::RectanglePlacement::stretchToFit);
     }
     else
-        jassert(!(mandelbrotImage.isNull() || burningShipImage.isNull()));
+        jassert(!(mandelbrotImage.isNull() || burningShipImage.isNull() ));
 
     fractalFunctionComboBox.addListener(this);
     
@@ -113,13 +115,16 @@ void FractalSynthesisAudioProcessorEditor::resized()
     auto adsrAreaUpper = bounds.removeFromRight(bounds.getWidth()/2);
     auto adsrAreaLower = adsrAreaUpper.removeFromBottom(adsrAreaUpper.getHeight()/2);
     
+    //sliders colors
+    getLookAndFeel().setColour (juce::Slider::rotarySliderOutlineColourId , juce::Colours::blue);
+    getLookAndFeel().setColour (juce::Slider::thumbColourId , juce::Colours::white);
+    
     attackSlider.setSliderStyle(juce::Slider::Rotary);
     //attackSlider.setRotaryParameters(this juce::Slider::RotaryHorizontalVerticalDrag));
     attackSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
     attackSlider.setPopupDisplayEnabled(true, true, this);
     attackSlider.setTextValueSuffix("Attack");
-
-
+   
     
     sustainSlider.setSliderStyle(juce::Slider::Rotary);
     //sustainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, sustainSlider.getY(),sustainSlider.getX());
@@ -155,7 +160,9 @@ void FractalSynthesisAudioProcessorEditor::comboBoxChanged(juce::ComboBox* combo
     
         if (combo->getSelectedId()==1)
             mImageComponent.setImage(mandelbrotImage, juce::RectanglePlacement::stretchToFit);
-        else
+        if (combo->getSelectedId()==2)
             mImageComponent.setImage(burningShipImage, juce::RectanglePlacement::stretchToFit);
+        else
+            mImageComponent.setImage(tricornImage, juce::RectanglePlacement::stretchToFit);
     
 }

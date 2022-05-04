@@ -36,7 +36,7 @@ private:
     
     juce::Image mandelbrotImage;
     juce::Image burningShipImage;
-    
+    juce::Image tricornImage;
 
     //Buttons, combobox, sliders...
     juce::ComboBox fractalFunctionComboBox;
