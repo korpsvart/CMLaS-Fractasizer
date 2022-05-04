@@ -17,13 +17,37 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
-    setSize(600, 400);
 
 
     fractalFunctionComboBox.addItem("Mandelbrot Set", 1);
     fractalFunctionComboBox.addItem("Burning Ship Set", 2);
     fractalFunctionComboBox.addItem("Tricorn", 3);
-    
+
+
+
+    setSliderStyle(attackSlider);
+    setSliderStyle(decaySlider);
+    setSliderStyle(sustainSlider);
+    setSliderStyle(releaseSlider);
+
+
+    attackLabel.setText("Attack", juce::dontSendNotification);
+    attackLabel.setJustificationType(juce::Justification::centred);
+    attackLabel.attachToComponent(&attackSlider, false);
+
+    decayLabel.setText("Decay", juce::dontSendNotification);
+    decayLabel.setJustificationType(juce::Justification::centred);
+    decayLabel.attachToComponent(&decaySlider, false);
+
+
+    sustainLabel.setText("Sustain", juce::dontSendNotification);
+    sustainLabel.setJustificationType(juce::Justification::centred);
+    sustainLabel.attachToComponent(&sustainSlider, false);
+
+
+    releaseLabel.setText("Release", juce::dontSendNotification);
+    releaseLabel.setJustificationType(juce::Justification::centred);
+    releaseLabel.attachToComponent(&releaseSlider, false);
 
 
 
@@ -43,26 +67,15 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     
     releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RELEASE", releaseSlider);
     
-    numPartialsAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "NUM_PARTIALS", numPartialsSlider);
-
-    mandelbrotImage = juce::ImageCache::getFromMemory(BinaryData::Mandelbrot_png, BinaryData::Mandelbrot_pngSize);
-    burningShipImage = juce::ImageCache::getFromMemory(BinaryData::burningShip_png, BinaryData::burningShip_pngSize);
-    tricornImage = juce::ImageCache::getFromMemory(BinaryData::tricorn_png, BinaryData::tricorn_pngSize);
+    mandelbrotImage = juce::ImageCache::getFromMemory(BinaryData::Mandelbrot2_png, BinaryData::Mandelbrot2_pngSize);
+    burningShipImage = juce::ImageCache::getFromMemory(BinaryData::BurningShip2_png, BinaryData::BurningShip2_pngSize);
+    tricornImage = juce::ImageCache::getFromMemory(BinaryData::Tricorn2_png, BinaryData::Tricorn2_pngSize);
     
-    std::cout << audioProcessor.apvts.getParameter("FRACTAL_FUNCTION")->getParameterIndex();
-   
-    // still have to figure out how to change the image when the combo box changes, for now we show the mandelbrot image
-    if (!(mandelbrotImage.isNull() || burningShipImage.isNull())) {
-        mImageComponent.setImage(mandelbrotImage, juce::RectanglePlacement::stretchToFit);
-    }
-    else
-        jassert(!(mandelbrotImage.isNull() || burningShipImage.isNull() ));
+
+    currentImage = mandelbrotImage;
 
     fractalFunctionComboBox.addListener(this);
-    
-    
-    addAndMakeVisible(mImageComponent);
-    
+   
     addAndMakeVisible(fractalFunctionComboBox);
 
     addAndMakeVisible(inputPlaneComponent);
@@ -78,10 +91,9 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     addAndMakeVisible(decaySlider);
     
     addAndMakeVisible(releaseSlider);
-    
-    addAndMakeVisible(numPartialsSlider);
 
 
+    setSize(700, 500);
 
 }
 
@@ -93,7 +105,12 @@ FractalSynthesisAudioProcessorEditor::~FractalSynthesisAudioProcessorEditor()
 void FractalSynthesisAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    //g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+
+    g.setOpacity(0.4);
+    g.drawImageWithin(currentImage, 0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight(),
+        juce::RectanglePlacement::fillDestination);
+
 
 }
 
@@ -112,57 +129,46 @@ void FractalSynthesisAudioProcessorEditor::resized()
     initialPointXSlider.setBounds(upperArea.removeFromTop(upperArea.getHeight()/2).reduced(5));
     initialPointYSlider.setBounds(upperArea.reduced(5));
     
-    auto adsrAreaUpper = bounds.removeFromRight(bounds.getWidth()/2);
+    auto adsrAreaUpper = bounds.reduced(7);
     auto adsrAreaLower = adsrAreaUpper.removeFromBottom(adsrAreaUpper.getHeight()/2);
     
-    //sliders colors
-    getLookAndFeel().setColour (juce::Slider::rotarySliderOutlineColourId , juce::Colours::blue);
-    getLookAndFeel().setColour (juce::Slider::thumbColourId , juce::Colours::white);
     
-    attackSlider.setSliderStyle(juce::Slider::Rotary);
-    //attackSlider.setRotaryParameters(this juce::Slider::RotaryHorizontalVerticalDrag));
-    attackSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    attackSlider.setPopupDisplayEnabled(true, true, this);
-    attackSlider.setTextValueSuffix("Attack");
-   
-    
-    sustainSlider.setSliderStyle(juce::Slider::Rotary);
-    //sustainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, sustainSlider.getY(),sustainSlider.getX());
-    sustainSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    sustainSlider.setPopupDisplayEnabled(true, true, this);
-    sustainSlider.setTextValueSuffix("Sustain");
-    
-    decaySlider.setSliderStyle(juce::Slider::Rotary);
-    decaySlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    decaySlider.setPopupDisplayEnabled(true, true, this);
-    decaySlider.setTextValueSuffix("Decay");
-    
-    //decaySlider.setTitle("Decay");
-    releaseSlider.setSliderStyle(juce::Slider::Rotary);
-    releaseSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    releaseSlider.setPopupDisplayEnabled(true, true, this);
-    releaseSlider.setTextValueSuffix("Release");
-    
-    numPartialsSlider.setSliderStyle(juce::Slider::Rotary);
-    
-    releaseSlider.setBounds(adsrAreaLower.removeFromRight(adsrAreaLower.getWidth()/2).reduced(5));
-    decaySlider.setBounds(adsrAreaLower.reduced(5));
-    sustainSlider.setBounds(adsrAreaUpper.removeFromRight(adsrAreaUpper.getWidth()/2).reduced(5));
-    attackSlider.setBounds(adsrAreaUpper.reduced(5));
-    
-    numPartialsSlider.setBounds(bounds.removeFromRight(bounds.getWidth()/2).reduced(5));
-    
-    mImageComponent.setBounds(bounds.reduced(5));
+    releaseSlider.setBounds(adsrAreaLower.removeFromRight(adsrAreaLower.getWidth()/2).reduced(7));
+    decaySlider.setBounds(adsrAreaLower.reduced(7));
+    sustainSlider.setBounds(adsrAreaUpper.removeFromRight(adsrAreaUpper.getWidth()/2).reduced(7));
+    attackSlider.setBounds(adsrAreaUpper.reduced(7));
 
 }
 
 void FractalSynthesisAudioProcessorEditor::comboBoxChanged(juce::ComboBox* combo){
     
+    /*
         if (combo->getSelectedId()==1)
             mImageComponent.setImage(mandelbrotImage, juce::RectanglePlacement::stretchToFit);
         if (combo->getSelectedId()==2)
             mImageComponent.setImage(burningShipImage, juce::RectanglePlacement::stretchToFit);
         else
             mImageComponent.setImage(tricornImage, juce::RectanglePlacement::stretchToFit);
-    
+    */
+
+
+    if (combo->getSelectedId() == 1)
+        currentImage = mandelbrotImage;
+    else if (combo->getSelectedId() == 2)
+        currentImage = burningShipImage;
+    else if(combo->getSelectedId() == 3)
+        currentImage = tricornImage;
+
+
+    repaint();
+
+}
+
+
+void FractalSynthesisAudioProcessorEditor::setSliderStyle(juce::Slider& slider)
+{
+
+    slider.setSliderStyle(juce::Slider::Rotary);
+    slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+    slider.setPopupDisplayEnabled(true, true, this);
 }

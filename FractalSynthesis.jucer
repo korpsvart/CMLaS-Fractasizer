@@ -6,8 +6,13 @@
   <MAINGROUP id="Io9bwR" name="FractalSynthesis">
     <GROUP id="{028E6BA3-DCA8-8DCD-61D4-C7DBB5217A84}" name="Binary">
       <FILE id="LWiCic" name="burningShip.png" compile="0" resource="1" file="Binary/burningShip.png"/>
+      <FILE id="affQ91" name="BurningShip2.png" compile="0" resource="1"
+            file="../../Downloads/BurningShip2.png"/>
       <FILE id="VGvsEh" name="Mandelbrot.png" compile="0" resource="1" file="Binary/Mandelbrot.png"/>
+      <FILE id="A31MaY" name="Mandelbrot2.png" compile="0" resource="1" file="../../Downloads/Mandelbrot2.png"/>
+      <FILE id="TRguVY" name="Mandelbrot3.png" compile="0" resource="1" file="../../Downloads/Mandelbrot3.png"/>
       <FILE id="a1T7U5" name="tricorn.png" compile="0" resource="1" file="Binary/tricorn.png"/>
+      <FILE id="PMx5SE" name="Tricorn2.png" compile="0" resource="1" file="../../Downloads/Tricorn2.png"/>
     </GROUP>
     <GROUP id="{7B01FA21-3F7E-DBB8-7C1E-01690869462C}" name="Source">
       <FILE id="cNNL7V" name="InputPlane.cpp" compile="1" resource="0" file="Source/InputPlane.cpp"/>

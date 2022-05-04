@@ -33,10 +33,14 @@ private:
     FractalSynthesisAudioProcessor& audioProcessor;
 
     void comboBoxChanged(juce::ComboBox* combo) override;
+
+    void setSliderStyle(juce::Slider& slider);
     
     juce::Image mandelbrotImage;
     juce::Image burningShipImage;
     juce::Image tricornImage;
+
+    juce::Image currentImage;
 
     //Buttons, combobox, sliders...
     juce::ComboBox fractalFunctionComboBox;
@@ -48,12 +52,13 @@ private:
     juce::Slider sustainSlider;
     juce::Slider decaySlider;
     juce::Slider releaseSlider;
-    
-    juce::Slider numPartialsSlider;
+
+    juce::Label attackLabel;
+    juce::Label decayLabel;
+    juce::Label sustainLabel;
+    juce::Label releaseLabel;
 
     InputPlane inputPlaneComponent;
-    
-    juce::ImageComponent mImageComponent;
 
     //Attachments (must be declared after the GUI elements to avoid crashes when closing the plugin)
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> fractalComboBoxAttachment;
@@ -65,7 +70,6 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sustainAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> decayAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> numPartialsAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FractalSynthesisAudioProcessorEditor)
 };

@@ -358,9 +358,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcess
     params.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release",
         juce::NormalisableRange<float> {0.1f, 3.0f}, 0.4f));
     
-    
-    params.push_back(std::make_unique<juce::AudioParameterFloat>("NUM_PARTIALS", "Number of partials", 0.1, 1, 0.5));
-
 
     return { params.begin(), params.end() };
 }
