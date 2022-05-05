@@ -264,7 +264,7 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
                     //get the n-th element of the fractal generated succession
                     double gain = gains[n];
-                    //voice->setGain(gain);
+                    voice->setLFOParams(10 * gain, 0.5f);
                     if (n > 0)
                         voice->setHarmonicN(std::abs(fractalPoints[n].real()));
                     //voice->setPan(fractalPoint.imag()/20);
@@ -357,6 +357,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcess
     
     params.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release",
         juce::NormalisableRange<float> {0.1f, 3.0f, 0.001f}, 0.4f));
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("WAVE_TYPE", "Wave type",
+        juce::StringArray("Sine", "Saw", "Square"), 0));
     
 
     return { params.begin(), params.end() };

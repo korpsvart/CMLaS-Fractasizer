@@ -14,7 +14,7 @@
 SynthVoice::SynthVoice(float harmonicN)
 {
     this->harmonicN = harmonicN;
-    lfoOsc.setFrequency (3.0f);
+    lfoOsc.setFrequency (lfoRate);
 }
 
 bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound)
@@ -86,8 +86,9 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
                 if (lfoUpdateCounter == 0)
                 {
                     lfoUpdateCounter = lfoUpdateRate;
-                    auto lfoOut = lfoOsc.processSample (0.0f);                                 // [5]
-                    auto gainVariation = juce::jmap (lfoOut, -1.0f, 1.0f, 0.05f, 0.3f);  // [6]
+                    auto lfoOut = lfoOsc.processSample (0.0f);
+                    auto depth = fixedGain * lfoDepth;
+                    auto gainVariation = juce::jmap (lfoOut, -1.0f, 1.0f, fixedGain - depth, fixedGain + depth);
                     setGain(gainVariation);
                 }
             }
@@ -116,6 +117,8 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     //Prepare oscillator (passing ProcessSpec)
 
     adsr.setSampleRate(sampleRate);
+
+    gain.setGainLinear(0.3f);
 
     juce::dsp::ProcessSpec spec;
     spec.maximumBlockSize = samplesPerBlock;
@@ -156,4 +159,29 @@ void SynthVoice::updateADSR(const float attack, const float decay, const float s
     adsrParams.sustain = sustain;
     adsrParams.release = release;
     adsr.setParameters(adsrParams);
+}
+
+void SynthVoice::setWaveType(const int choice)
+{
+
+    switch (choice)
+    {
+    case 0: //Sin wave
+        osc.initialise([](float x) { return std::sin(x); });
+        break;
+    case 1: //Saw wave
+        osc.initialise([](float x) { return x / juce::MathConstants<float>::pi; });
+        break;
+    case 2: //Square wave
+        osc.initialise([](float x) { return x < 0.0f ? -1.0f : 1.0f; });
+        break;
+    }
+}
+
+void SynthVoice::setLFOParams(const float lfoRate, const float lfoDepth)
+{
+    this->lfoRate = lfoRate;
+    lfoOsc.setFrequency(lfoRate);
+    this->lfoDepth = lfoDepth;
+
 }

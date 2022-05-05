@@ -41,6 +41,10 @@ public:
 
     void updateADSR(const float attack, const float decay, const float sustain, const float release);
 
+    void setLFOParams(const float lfoRate, const float lfoDepth);
+
+    void setWaveType(const int choice);
+
 
 private:
 
@@ -48,21 +52,23 @@ private:
     juce::ADSR::Parameters adsrParams;
     juce::AudioBuffer<float> synthBuffer; //Local buffer to temporarily store synth output
 
-    //juce::HeapBlock<char> heapBlock;
-    //juce::dsp::AudioBlock<float> tempBlock;
-
 
 
     //Oscillator variables
     juce::dsp::Oscillator<float> osc{ [](float x) { return std::sin(x); } };
 
     juce::dsp::Oscillator<float> lfoOsc{ [](float x) { return std::sin(x); }, 128};
+
+    float lfoRate = 3.0f; //Hz, how fast the lfo oscillates
+    float lfoDepth = 0.5f; //Depends on what you want to control
     
     static constexpr size_t lfoUpdateRate = 100;
     
     size_t lfoUpdateCounter = lfoUpdateRate;
     
     juce::dsp::Gain<float> gain;
+
+    float fixedGain = 0.5f;
 
     juce::dsp::Panner<float> panner;
 
