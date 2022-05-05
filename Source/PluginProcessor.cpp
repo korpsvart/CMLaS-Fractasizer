@@ -34,6 +34,7 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
 
     //Create synths
 
+    /*
     for (size_t order = 0; order < partialsNumber; order++)
     {
         juce::Synthesiser* synth = new juce::Synthesiser(); //create synth
@@ -45,6 +46,15 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
         }
         synths.push_back(synth); //Add current synth
     }
+
+    */
+    synth = new juce::Synthesiser();
+    synth->addSound(new SynthSound());
+    for (size_t voice = 0; voice < voicesNumber; voice++)
+    {
+        synth->addVoice(new SynthVoice(NUM_PARTIALS));
+    }
+
 
     //TODO: refactoring to correctly free memory
 
@@ -65,7 +75,7 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
 
 FractalSynthesisAudioProcessor::~FractalSynthesisAudioProcessor()
 {
-    synths.clear();
+    //synths.clear();
     
 }
 
@@ -138,9 +148,6 @@ void FractalSynthesisAudioProcessor::prepareToPlay (double sampleRate, int sampl
     // initialisation that you need..
 
 
-
-    for (juce::Synthesiser* synth: synths)
-    {
         for (int i = 0; i < synth->getNumVoices(); i++)
         {
             if (auto voice = dynamic_cast<SynthVoice*>(synth->getVoice(i)))
@@ -150,9 +157,6 @@ void FractalSynthesisAudioProcessor::prepareToPlay (double sampleRate, int sampl
 
         }
         synth->setCurrentPlaybackSampleRate(sampleRate);
-    }
-
-
 
 }
 
@@ -160,13 +164,9 @@ void FractalSynthesisAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
-    for (juce::Synthesiser* synth: synths)
-    {
         synth->clearSounds();
         synth->clearVoices();
-    }
   
-    
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -233,13 +233,11 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
         generateGains(fractalPoints);
 
+        generateFreqs(fractalPoints);
+
         updatedFractal = false;
     }
 
-    for (int n = 0; n < synths.size(); n++)
-    {
-
-        juce::Synthesiser* synth = synths.at(n);
 
             for (int i = 0; i < synth->getNumVoices(); ++i)
             {
@@ -263,16 +261,19 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     //Of course we need to take the absolute value if we use it to control frequency detuning or amplitude
 
                     //get the n-th element of the fractal generated succession
-                    double gain = gains[n];
-                    voice->setLFOParams(10 * gain, 0.5f);
-                    if (n > 0)
-                        voice->setHarmonicN(std::abs(fractalPoints[n].real()));
+                    //double gain = gains[n];
+                    //voice->setLFOParams(10 * gain, 0.5f);
+                    //if (n > 0)
+                    //    voice->setHarmonicN(std::abs(fractalPoints[n].real()));
                     //voice->setPan(fractalPoint.imag()/20);
+
+                    voice->setFreqDetunes(freqs);
+                    voice->setLFORates(gains);
                 }
             }
   
         synth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-    }
+
 
     midiMessages.clear();
 
@@ -387,7 +388,7 @@ void FractalSynthesisAudioProcessor::generateFractalSuccession(std::complex<doub
 
     std::complex<double> z = 0; //starting z
 
-    for (size_t synthNumber = 0; synthNumber < partialsNumber; synthNumber++)
+    for (size_t synthNumber = 0; synthNumber < NUM_PARTIALS; synthNumber++)
     {
         z = currentFractal(z, c);
         fractalPoints[synthNumber] = z;
@@ -404,10 +405,19 @@ void FractalSynthesisAudioProcessor::generateGains(std::vector<std::complex<doub
 
     for (size_t i = 0; i < fractalSuccession.size(); i++)
     {
-        gains[i] = std::abs(fractalSuccession[i].imag()) / total;
+        gains[i] = std::abs(fractalSuccession[i].imag()) * 10 / total; //i put a 10 here because i'm not using them as gains right now, be careful
     }
 
 
+}
+
+void FractalSynthesisAudioProcessor::generateFreqs(std::vector<std::complex<double>> fractalSuccession)
+{
+
+    for (size_t i = 0; i < fractalSuccession.size(); i++)
+    {
+        freqs[i] = std::abs(fractalSuccession[i].real());
+    }
 }
 
 

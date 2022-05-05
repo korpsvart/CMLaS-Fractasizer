@@ -9,12 +9,51 @@
 */
 
 #include "SynthVoice.h"
+#include "PluginProcessor.h"
 
 
-SynthVoice::SynthVoice(float harmonicN)
+SynthVoice::SynthVoice(int numPartials)
 {
-    this->harmonicN = harmonicN;
-    lfoOsc.setFrequency (lfoRate);
+
+    this->numPartials = numPartials;
+
+    for (size_t i = 0; i < numPartials; i++)
+    {
+        processorChains.push_back(juce::dsp::ProcessorChain<juce::dsp::Oscillator<float>, juce::dsp::Gain<float>, juce::dsp::Panner<float>>{});
+    }
+    for (size_t i = 0; i < numPartials; i++)
+    {
+        lfos.push_back(juce::dsp::Oscillator<float>{ [](float x) { return std::sin(x); }, 128 });
+    }
+
+    for (int i = 0; i < numPartials; ++i)
+    {
+
+        processorChains[i].get<oscIndex>().initialise([](float x) { return std::sin(x); });
+        processorChains[i].get<gainIndex>().setGainLinear(0.5f); //just a default value
+
+        lfos[i].setFrequency(3); //just a default value
+    }
+
+
+    for (int i = 0; i < numPartials; ++i)
+    {
+
+        detuneFactors.push_back(i + 1);
+    }
+
+    for (size_t i = 0; i < numPartials; i++)
+    {
+        lfoRates.push_back(3.0f);
+    }
+
+    for (size_t i = 0; i < numPartials; i++)
+    {
+        lfoDepths.push_back(0.5f);
+    }
+
+
+
 }
 
 bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound)
@@ -24,9 +63,18 @@ bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound)
 
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* sound, int currentPitchWheelPosition)
 {
-    osc.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber)*harmonicN);
-    adsr.noteOn();
+    //osc.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber)*harmonicN);
 
+
+    auto freq = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
+
+
+    for (int i = 0; i < numPartials; ++i)
+    {
+        processorChains[i].get<oscIndex>().setFrequency(freq * detuneFactors[i]);
+    }
+
+    adsr.noteOn();
 }
 
 void SynthVoice::stopNote(float velocity, bool allowTailOff)
@@ -67,8 +115,8 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
     //the AudioBlock we are actually modifying the given buffer)
     juce::dsp::AudioBlock<float> audioBlock{ synthBuffer };
 
-    osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
-    panner.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    //osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    //panner.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 
     for (size_t pos = 0; pos < (size_t) numSamples;)
             {
@@ -77,19 +125,23 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
      
                 juce::dsp::ProcessContextReplacing<float> context (block);
 
-                gain.process (context);
+                //gain.process (context);
 
+                for (int i = 0; i < numPartials; ++i)
+                {
+                    processorChains[i].process(context);
+                }
                 
                 pos += max;
                 lfoUpdateCounter -= max;
-     
+
                 if (lfoUpdateCounter == 0)
                 {
                     lfoUpdateCounter = lfoUpdateRate;
-                    auto lfoOut = lfoOsc.processSample (0.0f);
-                    auto depth = fixedGain * lfoDepth;
-                    auto gainVariation = juce::jmap (lfoOut, -1.0f, 1.0f, fixedGain - depth, fixedGain + depth);
-                    setGain(gainVariation);
+                    for (int i = 0; i < numPartials; ++i)
+                    {
+                        applyLFO(i);
+                    }
                 }
             }
 
@@ -111,6 +163,14 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
 
 }
 
+void SynthVoice::applyLFO(int i)
+{
+    auto lfoOut = lfos[i].processSample(0.0f);
+    auto depth = fixedGain * lfoDepths[i];
+    auto gainVariation = juce::jmap(lfoOut, -1.0f, 1.0f, fixedGain - depth, fixedGain + depth);
+    processorChains[i].get<gainIndex>().setGainLinear(gainVariation);
+}
+
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannelsNumber)
 {
 
@@ -118,17 +178,29 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 
     adsr.setSampleRate(sampleRate);
 
-    gain.setGainLinear(0.3f);
+    //gain.setGainLinear(0.3f);
 
     juce::dsp::ProcessSpec spec;
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;
     spec.numChannels = outputChannelsNumber;
 
-    osc.prepare(spec);
-    lfoOsc.prepare ({ spec.sampleRate / lfoUpdateRate, spec.maximumBlockSize, spec.numChannels});
-    gain.prepare(spec);
-    panner.prepare(spec);
+
+
+    for (int i = 0; i < numPartials; ++i)
+    {
+        processorChains[i].prepare(spec);
+    }
+
+
+    //osc.prepare(spec);
+    for (int i = 0; i < numPartials; i++)
+    {
+        lfos[i].
+            prepare({ spec.sampleRate / lfoUpdateRate, spec.maximumBlockSize, spec.numChannels });
+    }
+    //gain.prepare(spec);
+    //panner.prepare(spec);
 
 
     isPrepared = true;
@@ -144,12 +216,46 @@ void SynthVoice::setHarmonicN(float harmonicN)
 void SynthVoice::setGain(float gainValue)
 {
 
-    gain.setGainLinear(gainValue);
+    //gain.setGainLinear(gainValue);
+    //processorChain.get<gainIndex>().setGainLinear(gainValue);
 }
 
 void SynthVoice::setPan(float panValue)
 {
-    panner.setPan(panValue);
+    //panner.setPan(panValue);
+
+    for (int i = 0; i < numPartials; ++i)
+    {
+        processorChains[i].get<panIndex>().setPan(panValue);
+    }
+}
+
+void SynthVoice::setFreqDetunes(const std::vector<double>& freqDetunes)
+{
+
+    for (int i = 0; i < numPartials; ++i)
+    {
+        detuneFactors[i] = freqDetunes[i];
+    }
+
+}
+
+void SynthVoice::setLFORates(const std::vector<double>& lfoRates)
+{
+    for (size_t i = 0; i < numPartials; i++)
+    {
+        this->lfoRates[i] = lfoRates[i];
+        lfos[i].setFrequency(lfoRates[i]);
+    }
+
+}
+
+void SynthVoice::setLFODepths(const std::vector<double>& lfoDepths)
+{
+    for (size_t i = 0; i < numPartials; i++)
+    {
+        this->lfoDepths[i] = lfoDepths[i];
+    }
 }
 
 void SynthVoice::updateADSR(const float attack, const float decay, const float sustain, const float release)
@@ -164,6 +270,8 @@ void SynthVoice::updateADSR(const float attack, const float decay, const float s
 void SynthVoice::setWaveType(const int choice)
 {
 
+    /*
+
     switch (choice)
     {
     case 0: //Sin wave
@@ -176,12 +284,8 @@ void SynthVoice::setWaveType(const int choice)
         osc.initialise([](float x) { return x < 0.0f ? -1.0f : 1.0f; });
         break;
     }
+
+    */
 }
 
-void SynthVoice::setLFOParams(const float lfoRate, const float lfoDepth)
-{
-    this->lfoRate = lfoRate;
-    lfoOsc.setFrequency(lfoRate);
-    this->lfoDepth = lfoDepth;
 
-}
