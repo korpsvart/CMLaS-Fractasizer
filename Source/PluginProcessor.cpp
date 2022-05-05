@@ -264,7 +264,7 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
                     //get the n-th element of the fractal generated succession
                     double gain = gains[n];
-                    voice->setGain(gain);
+                    //voice->setGain(gain);
                     if (n > 0)
                         voice->setHarmonicN(std::abs(fractalPoints[n].real()));
                     //voice->setPan(fractalPoint.imag()/20);
