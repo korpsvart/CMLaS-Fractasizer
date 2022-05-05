@@ -33,7 +33,7 @@
     <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="FractalSynthesis" enablePluginBinaryCopyStep="1"
-                       vst3BinaryLocation="C:\Program Files\Common Files\VST3"/>
+                       vst3BinaryLocation="C:\myVST"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="FractalSynthesis" enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

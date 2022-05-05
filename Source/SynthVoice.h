@@ -48,10 +48,20 @@ private:
     juce::ADSR::Parameters adsrParams;
     juce::AudioBuffer<float> synthBuffer; //Local buffer to temporarily store synth output
 
+    //juce::HeapBlock<char> heapBlock;
+    //juce::dsp::AudioBlock<float> tempBlock;
+
+
 
     //Oscillator variables
     juce::dsp::Oscillator<float> osc{ [](float x) { return std::sin(x); } };
 
+    juce::dsp::Oscillator<float> lfoOsc{ [](float x) { return std::sin(x); }, 128};
+    
+    static constexpr size_t lfoUpdateRate = 100;
+    
+    size_t lfoUpdateCounter = lfoUpdateRate;
+    
     juce::dsp::Gain<float> gain;
 
     juce::dsp::Panner<float> panner;

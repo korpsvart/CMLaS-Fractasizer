@@ -14,6 +14,7 @@
 SynthVoice::SynthVoice(float harmonicN)
 {
     this->harmonicN = harmonicN;
+    lfoOsc.setFrequency (3.0f);
 }
 
 bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound)
@@ -66,10 +67,33 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
     //the AudioBlock we are actually modifying the given buffer)
     juce::dsp::AudioBlock<float> audioBlock{ synthBuffer };
 
-    osc.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
-    gain.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
-    panner.process(juce::dsp::ProcessContextReplacing<float> {audioBlock});
+    osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    panner.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 
+    for (size_t pos = 0; pos < (size_t) numSamples;)
+            {
+                auto max = juce::jmin ((size_t) numSamples - pos, lfoUpdateCounter);
+                auto block = audioBlock.getSubBlock (pos, max);
+     
+                juce::dsp::ProcessContextReplacing<float> context (block);
+
+                gain.process (context);
+
+                
+                pos += max;
+                lfoUpdateCounter -= max;
+     
+                if (lfoUpdateCounter == 0)
+                {
+                    lfoUpdateCounter = lfoUpdateRate;
+                    auto lfoOut = lfoOsc.processSample (0.0f);                                 // [5]
+                    auto gainVariation = juce::jmap (lfoOut, -1.0f, 1.0f, 0.05f, 0.3f);  // [6]
+                    setGain(gainVariation);
+                }
+            }
+
+
+        
     adsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
 
     //Add the local temp buffer to the final audio output buffer
@@ -99,6 +123,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     spec.numChannels = outputChannelsNumber;
 
     osc.prepare(spec);
+    lfoOsc.prepare ({ spec.sampleRate / lfoUpdateRate, spec.maximumBlockSize, spec.numChannels});
     gain.prepare(spec);
     panner.prepare(spec);
 
