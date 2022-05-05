@@ -81,6 +81,8 @@ private:
     std::vector<std::complex<double>> fractalPoints = { 0, 0, 0, 0 }; //to store the fractal points
 
     std::vector<double> gains = { 0, 0, 0, 0 };
+    
+    std::vector<double> harm = { 0, 0, 0, 0 };
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParams();
 
@@ -96,6 +98,8 @@ private:
     void generateFractalSuccession(std::complex<double> c);
 
     void generateGains(std::vector<std::complex<double>> fractalSuccession);
+    
+    void generateHarm(std::vector<std::complex<double>> fractalSuccession);
 
 
 

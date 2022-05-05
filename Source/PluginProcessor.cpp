@@ -232,6 +232,7 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         generateFractalSuccession(c);
 
         generateGains(fractalPoints);
+        generateHarm(fractalPoints);
 
         updatedFractal = false;
     }
@@ -265,8 +266,9 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     //get the n-th element of the fractal generated succession
                     double gain = gains[n];
                     voice->setGain(gain);
+                    double phase = harm[n];
                     if (n > 0)
-                        voice->setHarmonicN(std::abs(fractalPoints[n].real()));
+                        voice->setHarmonicN(phase);
                     //voice->setPan(fractalPoint.imag()/20);
                 }
             }
@@ -397,17 +399,28 @@ void FractalSynthesisAudioProcessor::generateGains(std::vector<std::complex<doub
     double total = 0;
 
     for (auto& fractalPoint : fractalSuccession)
-            total += std::abs(fractalPoint.imag());
+            total += std::sqrt(std::pow(fractalPoint.imag(),2)+ std::pow(fractalPoint.real(),2));
 
     for (size_t i = 0; i < fractalSuccession.size(); i++)
     {
-        gains[i] = std::abs(fractalSuccession[i].imag()) / total;
+        gains[i] = std::sqrt(std::pow(fractalSuccession[i].imag(),2)+ std::pow(fractalSuccession[i].real(),2)) / total;
     }
-
-
 }
 
 
+void FractalSynthesisAudioProcessor::generateHarm(std::vector<std::complex<double>> fractalSuccession)
+{
+    double phase;
+    for (size_t i = 0; i < fractalSuccession.size(); i++)
+    {
+        phase = std::atan(fractalSuccession[i].imag()/fractalSuccession[i].real());
+        if (phase < 0)
+            phase = phase + juce::MathConstants<double>::twoPi;
+        
+        harm[i] = phase;
+    }
+
+}
 
 
 

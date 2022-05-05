@@ -14,7 +14,7 @@
 SynthVoice::SynthVoice(float harmonicN)
 {
     this->harmonicN = harmonicN;
-    lfoOsc.setFrequency (3.0f);
+    //lfoOsc.setFrequency (3.0f);
 }
 
 bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound)
@@ -25,6 +25,7 @@ bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound)
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* sound, int currentPitchWheelPosition)
 {
     osc.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber)*harmonicN);
+    std::cout << "Harmonic Number " << harmonicN << "\t :" << juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber)*harmonicN << std::endl;
     adsr.noteOn();
 
 }
@@ -69,28 +70,29 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
 
     osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     panner.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 
-    for (size_t pos = 0; pos < (size_t) numSamples;)
-            {
-                auto max = juce::jmin ((size_t) numSamples - pos, lfoUpdateCounter);
-                auto block = audioBlock.getSubBlock (pos, max);
-     
-                juce::dsp::ProcessContextReplacing<float> context (block);
-
-                gain.process (context);
-
-                
-                pos += max;
-                lfoUpdateCounter -= max;
-     
-                if (lfoUpdateCounter == 0)
-                {
-                    lfoUpdateCounter = lfoUpdateRate;
-                    auto lfoOut = lfoOsc.processSample (0.0f);                                 // [5]
-                    auto gainVariation = juce::jmap (lfoOut, -1.0f, 1.0f, 0.05f, 0.3f);  // [6]
-                    setGain(gainVariation);
-                }
-            }
+//    for (size_t pos = 0; pos < (size_t) numSamples;)
+//            {
+//                auto max = juce::jmin ((size_t) numSamples - pos, lfoUpdateCounter);
+//                auto block = audioBlock.getSubBlock (pos, max);
+//
+//                juce::dsp::ProcessContextReplacing<float> context (block);
+//
+//                gain.process (context);
+//
+//
+//                pos += max;
+//                lfoUpdateCounter -= max;
+//
+//                if (lfoUpdateCounter == 0)
+//                {
+//                    lfoUpdateCounter = lfoUpdateRate;
+//                    auto lfoOut = lfoOsc.processSample (0.0f);                                 // [5]
+//                    auto gainVariation = juce::jmap (lfoOut, -1.0f, 1.0f, 0.05f, 0.3f);  // [6]
+//                    setGain(gainVariation);
+//                }
+//            }
 
 
         
