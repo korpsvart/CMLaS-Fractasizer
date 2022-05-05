@@ -413,11 +413,16 @@ void FractalSynthesisAudioProcessor::generateHarm(std::vector<std::complex<doubl
     double phase;
     for (size_t i = 0; i < fractalSuccession.size(); i++)
     {
+       
         phase = std::atan(fractalSuccession[i].imag()/fractalSuccession[i].real());
-
-        phase = (phase + juce::MathConstants<double>::twoPi)/juce::MathConstants<double>::twoPi;
         
-        harm[i] = phase;
+        // if the real part is negative we add pi to the phase
+        if(fractalSuccession[i].real()<0)
+            phase = (phase + juce::MathConstants<double>::twoPi/2);
+        
+        
+        // normalize phase
+        harm[i] = phase/juce::MathConstants<double>::twoPi;
     }
 
 }
