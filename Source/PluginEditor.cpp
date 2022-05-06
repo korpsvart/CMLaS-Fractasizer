@@ -117,6 +117,8 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
         addAndMakeVisible(decaySliders[i]);
 
         addAndMakeVisible(releaseSliders[i]);
+
+        addAndMakeVisible(waveTypeComboBoxes[i]);
     }
 
 
@@ -158,15 +160,14 @@ void FractalSynthesisAudioProcessorEditor::resized()
     auto osc4Area = lowerOscArea;
 
 
-    auto osc1ADSRArea = osc1Area.removeFromLeft(osc1Area.getWidth() / 2);
-    auto osc1WaveTypeArea = osc1Area;
-    auto osc1ADArea = osc1ADSRArea.removeFromTop(osc1ADSRArea.getHeight() / 2);
-    auto osc1SRArea = osc1ADSRArea;
+    buildOscSubArea(0, osc1Area);
+    buildOscSubArea(1, osc2Area);
+    buildOscSubArea(2, osc3Area);
+    buildOscSubArea(3, osc4Area);
 
-    attackSliders[0]->setBounds(osc1ADArea.removeFromLeft(osc1ADArea.getWidth() / 2));
-    decaySliders[0]->setBounds(osc1ADArea);
-    sustainSliders[0]->setBounds(osc1SRArea.removeFromLeft(osc1SRArea.getWidth() / 2));
-    releaseSliders[0]->setBounds(osc1SRArea);
+
+
+
 
     auto fractalArea = bounds;
 
@@ -215,4 +216,21 @@ void FractalSynthesisAudioProcessorEditor::setSliderStyle(juce::Slider* slider)
     slider->setPopupDisplayEnabled(true, true, this);
     slider->setTextValueSuffix(" seconds");
 
+}
+
+void FractalSynthesisAudioProcessorEditor::buildOscSubArea(int index, juce::Rectangle<int> bounds)
+{
+
+    auto oscADSRArea = bounds.removeFromLeft(bounds.getWidth() / 2);
+    auto oscWaveTypeArea = bounds.removeFromTop(bounds.getHeight() / 2);
+    auto oscWaveVisualizerArea = bounds;
+    auto oscADArea = oscADSRArea.removeFromTop(oscADSRArea.getHeight() / 2);
+    auto oscSRArea = oscADSRArea;
+
+    attackSliders[index]->setBounds(oscADArea.removeFromLeft(oscADArea.getWidth() / 2));
+    decaySliders[index]->setBounds(oscADArea);
+    sustainSliders[index]->setBounds(oscSRArea.removeFromLeft(oscSRArea.getWidth() / 2));
+    releaseSliders[index]->setBounds(oscSRArea);
+
+    waveTypeComboBoxes[index]->setBounds(oscWaveTypeArea);
 }

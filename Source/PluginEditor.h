@@ -35,6 +35,8 @@ private:
     void comboBoxChanged(juce::ComboBox* combo) override;
 
     void setSliderStyle(juce::Slider* slider);
+
+    void buildOscSubArea(int index, juce::Rectangle<int> bounds);
     
     juce::Image mandelbrotImage;
     juce::Image burningShipImage;
