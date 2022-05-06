@@ -73,40 +73,6 @@ private:
     juce::OwnedArray<juce::ComboBox> waveTypeComboBoxes;
 
 
-    /*
-
-    //Osc 0
-    juce::Slider attackSlider0;
-    juce::Slider sustainSlider0;
-    juce::Slider decaySlider0;
-    juce::Slider releaseSlider0;
-    juce::ComboBox waveTypeComboBox0;
-
-    juce::Label attackLabel0;
-    juce::Label decayLabel0;
-    juce::Label sustainLabel0;
-    juce::Label releaseLabel0;
-    juce::Label waveTypeLabel0;
-    
-
-    //Osc 1
-    juce::Slider attackSlider1;
-    juce::Slider sustainSlider1;
-    juce::Slider decaySlider1;
-    juce::Slider releaseSlider1;
-    juce::ComboBox waveTypeComboBox1;
-
-    juce::Label attackLabel1;
-    juce::Label decayLabel1;
-    juce::Label sustainLabel1;
-    juce::Label releaseLabel1;
-    juce::Label waveTypeLabel1;
-
-    */
-
-
-
-
     InputPlane inputPlaneComponent;
 
     //Attachments (must be declared after the GUI elements to avoid crashes when closing the plugin)
@@ -131,6 +97,13 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
 
     */
+
+    juce::Rectangle<int> osc1Area;
+    juce::Rectangle<int> osc2Area;
+    juce::Rectangle<int> osc3Area;
+    juce::Rectangle<int> osc4Area;
+    juce::Rectangle<int> fractalArea;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FractalSynthesisAudioProcessorEditor)
 };

@@ -141,6 +141,23 @@ void FractalSynthesisAudioProcessorEditor::paint (juce::Graphics& g)
         juce::RectanglePlacement::fillDestination);
 
 
+
+    g.setColour(juce::Colours::floralwhite);
+    g.setOpacity(0.8);
+    g.drawRoundedRectangle(osc1Area.toFloat().reduced(15), 5.0f, 4.0f);
+    g.drawText("OSC 1", osc1Area.toFloat().removeFromTop(10), juce::Justification::left);
+
+    g.drawRoundedRectangle(osc2Area.toFloat().reduced(15), 5.0f, 4.0f);
+    g.drawText("OSC 2", osc2Area.toFloat().removeFromTop(10), juce::Justification::left);
+
+    g.drawRoundedRectangle(osc3Area.toFloat().reduced(15), 5.0f, 4.0f);
+    g.drawText("OSC 3", osc3Area.toFloat().removeFromTop(10), juce::Justification::left);
+
+    g.drawRoundedRectangle(osc4Area.toFloat().reduced(15), 5.0f, 4.0f);
+    g.drawText("OSC 4", osc4Area.toFloat().removeFromTop(10), juce::Justification::left);
+
+
+
 }
 
 void FractalSynthesisAudioProcessorEditor::resized()
@@ -148,30 +165,22 @@ void FractalSynthesisAudioProcessorEditor::resized()
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
 
-
     auto bounds = getLocalBounds().reduced(20);
 
-    auto oscArea = bounds.removeFromTop(bounds.getHeight()/1.5);
+    auto oscArea = bounds.removeFromTop(bounds.getHeight() / 1.5);
     auto upperOscArea = oscArea.removeFromTop(oscArea.getHeight() / 2);
     auto lowerOscArea = oscArea;
-    auto osc1Area = upperOscArea.removeFromLeft(upperOscArea.getWidth() / 2);
-    auto osc2Area = upperOscArea;
-    auto osc3Area = lowerOscArea.removeFromLeft(lowerOscArea.getWidth() / 2);
-    auto osc4Area = lowerOscArea;
+    osc1Area = upperOscArea.removeFromLeft(upperOscArea.getWidth() / 2);
+    osc2Area = upperOscArea;
+    osc3Area = lowerOscArea.removeFromLeft(lowerOscArea.getWidth() / 2);
+    osc4Area = lowerOscArea;
+    fractalArea = bounds;
 
 
     buildOscSubArea(0, osc1Area);
     buildOscSubArea(1, osc2Area);
     buildOscSubArea(2, osc3Area);
     buildOscSubArea(3, osc4Area);
-
-
-
-
-
-    auto fractalArea = bounds;
-
-
 
     fractalFunctionComboBox.setBounds(fractalArea.removeFromLeft(fractalArea.getWidth()/3).reduced(5));
     inputPlaneComponent.setBounds(fractalArea.removeFromLeft(fractalArea.getWidth()/2).reduced(5));
@@ -221,9 +230,11 @@ void FractalSynthesisAudioProcessorEditor::setSliderStyle(juce::Slider* slider)
 void FractalSynthesisAudioProcessorEditor::buildOscSubArea(int index, juce::Rectangle<int> bounds)
 {
 
-    auto oscADSRArea = bounds.removeFromLeft(bounds.getWidth() / 2);
-    auto oscWaveTypeArea = bounds.removeFromTop(bounds.getHeight() / 2);
-    auto oscWaveVisualizerArea = bounds;
+    auto tempBounds = juce::Rectangle<int>(bounds); //create a copy so we don't modify the variable (needed by the paint method to draw the rectangle)
+    tempBounds = tempBounds.reduced(40);
+    auto oscADSRArea = tempBounds.removeFromLeft(tempBounds.getWidth() / 2);
+    auto oscWaveTypeArea = tempBounds.removeFromTop(tempBounds.getHeight() / 2);
+    auto oscWaveVisualizerArea = tempBounds;
     auto oscADArea = oscADSRArea.removeFromTop(oscADSRArea.getHeight() / 2);
     auto oscSRArea = oscADSRArea;
 
