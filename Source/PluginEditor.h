@@ -34,7 +34,7 @@ private:
 
     void comboBoxChanged(juce::ComboBox* combo) override;
 
-    void setSliderStyle(juce::Slider& slider);
+    void setSliderStyle(juce::Slider* slider);
     
     juce::Image mandelbrotImage;
     juce::Image burningShipImage;
@@ -47,16 +47,63 @@ private:
 
     juce::Slider initialPointXSlider;
     juce::Slider initialPointYSlider;
-    
-    juce::Slider attackSlider;
-    juce::Slider sustainSlider;
-    juce::Slider decaySlider;
-    juce::Slider releaseSlider;
 
-    juce::Label attackLabel;
-    juce::Label decayLabel;
-    juce::Label sustainLabel;
-    juce::Label releaseLabel;
+
+    juce::OwnedArray<juce::Slider> attackSliders;
+
+    juce::OwnedArray<juce::Slider> sustainSliders;
+
+    juce::OwnedArray<juce::Slider> releaseSliders;
+
+    juce::OwnedArray<juce::Slider> decaySliders;
+
+
+    juce::OwnedArray<juce::Label> attackLabels;
+
+    juce::OwnedArray<juce::Label> sustainLabels;
+
+    juce::OwnedArray<juce::Label> releaseLabels;
+
+    juce::OwnedArray<juce::Label> decayLabels;
+
+    juce::OwnedArray<juce::Label> waveTypeLabels;
+
+    juce::OwnedArray<juce::ComboBox> waveTypeComboBoxes;
+
+
+    /*
+
+    //Osc 0
+    juce::Slider attackSlider0;
+    juce::Slider sustainSlider0;
+    juce::Slider decaySlider0;
+    juce::Slider releaseSlider0;
+    juce::ComboBox waveTypeComboBox0;
+
+    juce::Label attackLabel0;
+    juce::Label decayLabel0;
+    juce::Label sustainLabel0;
+    juce::Label releaseLabel0;
+    juce::Label waveTypeLabel0;
+    
+
+    //Osc 1
+    juce::Slider attackSlider1;
+    juce::Slider sustainSlider1;
+    juce::Slider decaySlider1;
+    juce::Slider releaseSlider1;
+    juce::ComboBox waveTypeComboBox1;
+
+    juce::Label attackLabel1;
+    juce::Label decayLabel1;
+    juce::Label sustainLabel1;
+    juce::Label releaseLabel1;
+    juce::Label waveTypeLabel1;
+
+    */
+
+
+
 
     InputPlane inputPlaneComponent;
 
@@ -65,11 +112,23 @@ private:
 
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderInitialPointXAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderInitialPointYAttachment;
+
+
+    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, 4> attackAttachments;
+
+    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, 4> decayAttachments;
+
+    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, 4> sustainAttachments;
+
+    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, 4> releaseAttachments;
     
+    /*
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sustainAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> decayAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
+
+    */
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FractalSynthesisAudioProcessorEditor)
 };

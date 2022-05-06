@@ -249,12 +249,7 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     // ADSR
                     // LFO ecc...
 
-                    auto& attack = *apvts.getRawParameterValue("ATTACK");
-                    auto& decay = *apvts.getRawParameterValue("DECAY");
-                    auto& sustain = *apvts.getRawParameterValue("SUSTAIN");
-                    auto& release = *apvts.getRawParameterValue("RELEASE");
-
-                    voice->updateADSR(attack.load(), decay.load(), sustain.load(), release.load());
+                    updateADSR(i, voice);
 
                     //As an example, use X to control frequency detune and Y to control amplitude
 
@@ -347,21 +342,79 @@ juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcess
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>("INITIAL_POINT_Y", "Initial Point Y", -1, 1, 0.5));
 
-    params.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK", "Attack",
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK0", "Attack",
         juce::NormalisableRange<float> {0.01f, 1.0f, 0.001f}, 0.01f));
 
-    params.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY", "Decay",
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY0", "Decay",
         juce::NormalisableRange<float> {0.1f, 1.0f, 0.001f}, 0.1f));
     
-    params.push_back(std::make_unique<juce::AudioParameterFloat>("SUSTAIN", "Sustain",
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("SUSTAIN0", "Sustain",
         juce::NormalisableRange<float> {0.1f, 1.0f, 0.001f}, 1.0f));
     
-    params.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release",
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE0", "Release",
         juce::NormalisableRange<float> {0.1f, 3.0f, 0.001f}, 0.4f));
 
-    params.push_back(std::make_unique<juce::AudioParameterChoice>("WAVE_TYPE", "Wave type",
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("WAVE_TYPE0", "Wave type",
         juce::StringArray("Sine", "Saw", "Square"), 0));
-    
+
+
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK1", "Attack",
+        juce::NormalisableRange<float> {0.01f, 1.0f, 0.001f}, 0.01f));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY1", "Decay",
+        juce::NormalisableRange<float> {0.1f, 1.0f, 0.001f}, 0.1f));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("SUSTAIN1", "Sustain",
+        juce::NormalisableRange<float> {0.1f, 1.0f, 0.001f}, 1.0f));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE1", "Release",
+        juce::NormalisableRange<float> {0.1f, 3.0f, 0.001f}, 0.4f));
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("WAVE_TYPE1", "Wave type",
+        juce::StringArray("Sine", "Saw", "Square"), 0));
+
+
+
+
+
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK2", "Attack",
+        juce::NormalisableRange<float> {0.01f, 1.0f, 0.001f}, 0.01f));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY2", "Decay",
+        juce::NormalisableRange<float> {0.1f, 1.0f, 0.001f}, 0.1f));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("SUSTAIN2", "Sustain",
+        juce::NormalisableRange<float> {0.1f, 1.0f, 0.001f}, 1.0f));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE2", "Release",
+        juce::NormalisableRange<float> {0.1f, 3.0f, 0.001f}, 0.4f));
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("WAVE_TYPE2", "Wave type",
+        juce::StringArray("Sine", "Saw", "Square"), 0));
+
+
+
+
+
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK3", "Attack",
+        juce::NormalisableRange<float> {0.01f, 1.0f, 0.001f}, 0.01f));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY3", "Decay",
+        juce::NormalisableRange<float> {0.1f, 1.0f, 0.001f}, 0.1f));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("SUSTAIN3", "Sustain",
+        juce::NormalisableRange<float> {0.1f, 1.0f, 0.001f}, 1.0f));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE3", "Release",
+        juce::NormalisableRange<float> {0.1f, 3.0f, 0.001f}, 0.4f));
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("WAVE_TYPE3", "Wave type",
+        juce::StringArray("Sine", "Saw", "Square"), 0));
+
+
 
     return { params.begin(), params.end() };
 }
@@ -418,6 +471,18 @@ void FractalSynthesisAudioProcessor::generateFreqs(std::vector<std::complex<doub
     {
         freqs[i] = std::abs(fractalSuccession[i].real());
     }
+}
+
+void FractalSynthesisAudioProcessor::updateADSR(int partialIndex, SynthVoice* voice)
+{
+    auto indexString = std::to_string(partialIndex);
+
+    auto& attack = *apvts.getRawParameterValue("ATTACK" + indexString);
+    auto& decay = *apvts.getRawParameterValue("DECAY" + indexString);
+    auto& sustain = *apvts.getRawParameterValue("SUSTAIN" + indexString);
+    auto& release = *apvts.getRawParameterValue("RELEASE" + indexString);
+
+    voice->updateADSR(attack.load(), decay.load(), sustain.load(), release.load());
 }
 
 

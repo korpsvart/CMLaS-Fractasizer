@@ -9,6 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "SynthVoice.h"
 
 
 //==============================================================================
@@ -106,6 +107,8 @@ private:
 
 
     void generateFreqs(std::vector<std::complex<double>> fractalSuccession);
+
+    void updateADSR(int partialIndex, SynthVoice* voice);
 
 
 

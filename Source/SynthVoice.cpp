@@ -267,25 +267,23 @@ void SynthVoice::updateADSR(const float attack, const float decay, const float s
     adsr.setParameters(adsrParams);
 }
 
-void SynthVoice::setWaveType(const int choice)
+void SynthVoice::setWaveType(const int partialIndex, const int choice)
 {
 
-    /*
 
     switch (choice)
     {
     case 0: //Sin wave
-        osc.initialise([](float x) { return std::sin(x); });
+        processorChains[partialIndex].get<oscIndex>().initialise([](float x) { return std::sin(x); });
         break;
     case 1: //Saw wave
-        osc.initialise([](float x) { return x / juce::MathConstants<float>::pi; });
+        processorChains[partialIndex].get<oscIndex>().initialise([](float x) { return x / juce::MathConstants<float>::pi; });
         break;
     case 2: //Square wave
-        osc.initialise([](float x) { return x < 0.0f ? -1.0f : 1.0f; });
+        processorChains[partialIndex].get<oscIndex>().initialise([](float x) { return x < 0.0f ? -1.0f : 1.0f; });
         break;
     }
 
-    */
 }
 
 

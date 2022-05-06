@@ -11,7 +11,6 @@
 #pragma once
 #include <JuceHeader.h>
 #include "SynthSound.h"
-#include "PluginProcessor.h"
 
 class SynthVoice : public juce::SynthesiserVoice
 {
@@ -58,7 +57,7 @@ public:
     };
 
 
-    void setWaveType(const int choice);
+    void setWaveType(const int partialIndex, const int choice);
 
     void applyLFO(int i);
 

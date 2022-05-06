@@ -25,30 +25,59 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
 
 
 
-    setSliderStyle(attackSlider);
-    setSliderStyle(decaySlider);
-    setSliderStyle(sustainSlider);
-    setSliderStyle(releaseSlider);
+
+    for (size_t i = 0; i < 4; i++)
+    {
+
+        attackSliders.add(new juce::Slider());
+        decaySliders.add(new juce::Slider());
+        sustainSliders.add(new juce::Slider());
+        releaseSliders.add(new juce::Slider());
+        waveTypeComboBoxes.add(new juce::ComboBox());
+
+        attackLabels.add(new juce::Label());
+        decayLabels.add(new juce::Label());
+        sustainLabels.add(new juce::Label());
+        releaseLabels.add(new juce::Label());
+        waveTypeLabels.add(new juce::Label());
+
+        setSliderStyle(attackSliders[i]);
+        setSliderStyle(decaySliders[i]);
+        setSliderStyle(sustainSliders[i]);
+        setSliderStyle(releaseSliders[i]);
 
 
+        attackLabels[i]->setText("Attack", juce::dontSendNotification);
+        attackLabels[i]->setJustificationType(juce::Justification::centred);
+        attackLabels[i]->attachToComponent(attackSliders[i], false);
 
-    attackLabel.setText("Attack", juce::dontSendNotification);
-    attackLabel.setJustificationType(juce::Justification::centred);
-    attackLabel.attachToComponent(&attackSlider, false);
-
-    decayLabel.setText("Decay", juce::dontSendNotification);
-    decayLabel.setJustificationType(juce::Justification::centred);
-    decayLabel.attachToComponent(&decaySlider, false);
-
-
-    sustainLabel.setText("Sustain", juce::dontSendNotification);
-    sustainLabel.setJustificationType(juce::Justification::centred);
-    sustainLabel.attachToComponent(&sustainSlider, false);
+        decayLabels[i]->setText("Decay", juce::dontSendNotification);
+        decayLabels[i]->setJustificationType(juce::Justification::centred);
+        decayLabels[i]->attachToComponent(decaySliders[i], false);
 
 
-    releaseLabel.setText("Release", juce::dontSendNotification);
-    releaseLabel.setJustificationType(juce::Justification::centred);
-    releaseLabel.attachToComponent(&releaseSlider, false);
+        sustainLabels[i]->setText("Sustain", juce::dontSendNotification);
+        sustainLabels[i]->setJustificationType(juce::Justification::centred);
+        sustainLabels[i]->attachToComponent(sustainSliders[i], false);
+
+
+        releaseLabels[i]->setText("Release", juce::dontSendNotification);
+        releaseLabels[i]->setJustificationType(juce::Justification::centred);
+        releaseLabels[i]->attachToComponent(releaseSliders[i], false);
+
+
+        attackAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "ATTACK", *attackSliders[i]);
+
+        sustainAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "SUSTAIN", *sustainSliders[i]);
+
+        decayAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "DECAY", *decaySliders[i]);
+
+        releaseAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RELEASE", *releaseSliders[i]);
+
+
+    }
+
+
 
 
 
@@ -60,14 +89,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
 
     sliderInitialPointYAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "INITIAL_POINT_Y", initialPointYSlider);
     
-    attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "ATTACK", attackSlider);
-    
-    sustainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "SUSTAIN", sustainSlider);
-    
-    decayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "DECAY", decaySlider);
-    
-    releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RELEASE", releaseSlider);
-    
+
     mandelbrotImage = juce::ImageCache::getFromMemory(BinaryData::Mandelbrot2_png, BinaryData::Mandelbrot2_pngSize);
     burningShipImage = juce::ImageCache::getFromMemory(BinaryData::BurningShip2_png, BinaryData::BurningShip2_pngSize);
     tricornImage = juce::ImageCache::getFromMemory(BinaryData::Tricorn2_png, BinaryData::Tricorn2_pngSize);
@@ -84,17 +106,21 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     addAndMakeVisible(initialPointXSlider);
 
     addAndMakeVisible(initialPointYSlider);
-    
-    addAndMakeVisible(attackSlider);
-    
-    addAndMakeVisible(sustainSlider);
-    
-    addAndMakeVisible(decaySlider);
-    
-    addAndMakeVisible(releaseSlider);
 
 
-    setSize(700, 500);
+    for (size_t i = 0; i < 4; i++)
+    {
+        addAndMakeVisible(attackSliders[i]);
+
+        addAndMakeVisible(sustainSliders[i]);
+
+        addAndMakeVisible(decaySliders[i]);
+
+        addAndMakeVisible(releaseSliders[i]);
+    }
+
+
+    setSize(900, 900);
 
 }
 
@@ -123,21 +149,36 @@ void FractalSynthesisAudioProcessorEditor::resized()
 
     auto bounds = getLocalBounds().reduced(20);
 
-    auto upperArea = bounds.removeFromTop(bounds.getHeight()/2);
-    fractalFunctionComboBox.setBounds(upperArea.removeFromLeft(upperArea.getWidth()/3).reduced(5));
-    inputPlaneComponent.setBounds(upperArea.removeFromLeft(upperArea.getWidth()/2).reduced(5));
+    auto oscArea = bounds.removeFromTop(bounds.getHeight()/1.5);
+    auto upperOscArea = oscArea.removeFromTop(oscArea.getHeight() / 2);
+    auto lowerOscArea = oscArea;
+    auto osc1Area = upperOscArea.removeFromLeft(upperOscArea.getWidth() / 2);
+    auto osc2Area = upperOscArea;
+    auto osc3Area = lowerOscArea.removeFromLeft(lowerOscArea.getWidth() / 2);
+    auto osc4Area = lowerOscArea;
+
+
+    auto osc1ADSRArea = osc1Area.removeFromLeft(osc1Area.getWidth() / 2);
+    auto osc1WaveTypeArea = osc1Area;
+    auto osc1ADArea = osc1ADSRArea.removeFromTop(osc1ADSRArea.getHeight() / 2);
+    auto osc1SRArea = osc1ADSRArea;
+
+    attackSliders[0]->setBounds(osc1ADArea.removeFromLeft(osc1ADArea.getWidth() / 2));
+    decaySliders[0]->setBounds(osc1ADArea);
+    sustainSliders[0]->setBounds(osc1SRArea.removeFromLeft(osc1SRArea.getWidth() / 2));
+    releaseSliders[0]->setBounds(osc1SRArea);
+
+    auto fractalArea = bounds;
+
+
+
+    fractalFunctionComboBox.setBounds(fractalArea.removeFromLeft(fractalArea.getWidth()/3).reduced(5));
+    inputPlaneComponent.setBounds(fractalArea.removeFromLeft(fractalArea.getWidth()/2).reduced(5));
    
-    initialPointXSlider.setBounds(upperArea.removeFromTop(upperArea.getHeight()/2).reduced(5));
-    initialPointYSlider.setBounds(upperArea.reduced(5));
+    initialPointXSlider.setBounds(fractalArea.removeFromTop(fractalArea.getHeight()/2).reduced(5));
+    initialPointYSlider.setBounds(fractalArea.reduced(5));
     
-    auto adsrAreaUpper = bounds.reduced(9);
-    auto adsrAreaLower = adsrAreaUpper.removeFromBottom(adsrAreaUpper.getHeight()/2);
-    
-    
-    releaseSlider.setBounds(adsrAreaLower.removeFromRight(adsrAreaLower.getWidth()/2).reduced(7));
-    decaySlider.setBounds(adsrAreaLower.reduced(7));
-    sustainSlider.setBounds(adsrAreaUpper.removeFromRight(adsrAreaUpper.getWidth()/2).reduced(7));
-    attackSlider.setBounds(adsrAreaUpper.reduced(7));
+ 
 
 }
 
@@ -166,12 +207,12 @@ void FractalSynthesisAudioProcessorEditor::comboBoxChanged(juce::ComboBox* combo
 }
 
 
-void FractalSynthesisAudioProcessorEditor::setSliderStyle(juce::Slider& slider)
+void FractalSynthesisAudioProcessorEditor::setSliderStyle(juce::Slider* slider)
 {
 
-    slider.setSliderStyle(juce::Slider::Rotary);
-    slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    slider.setPopupDisplayEnabled(true, true, this);
-    slider.setTextValueSuffix(" seconds");
+    slider->setSliderStyle(juce::Slider::Rotary);
+    slider->setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+    slider->setPopupDisplayEnabled(true, true, this);
+    slider->setTextValueSuffix(" seconds");
 
 }
