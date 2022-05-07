@@ -60,7 +60,7 @@ public:
 
     juce::AudioProcessorValueTreeState apvts;
 
-
+    juce::AudioVisualiserComponent waveViewer;
 
 private:
 

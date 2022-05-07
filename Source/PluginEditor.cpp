@@ -93,7 +93,8 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     
     addAndMakeVisible(releaseSlider);
 
-
+    addAndMakeVisible(audioProcessor.waveViewer);
+    
     setSize(700, 500);
 
 }
@@ -132,12 +133,15 @@ void FractalSynthesisAudioProcessorEditor::resized()
     
     auto adsrAreaUpper = bounds.reduced(9);
     auto adsrAreaLower = adsrAreaUpper.removeFromBottom(adsrAreaUpper.getHeight()/2);
+    auto waveArea = adsrAreaLower.removeFromLeft(adsrAreaLower.getWidth()/2);
     
     
     releaseSlider.setBounds(adsrAreaLower.removeFromRight(adsrAreaLower.getWidth()/2).reduced(7));
     decaySlider.setBounds(adsrAreaLower.reduced(7));
     sustainSlider.setBounds(adsrAreaUpper.removeFromRight(adsrAreaUpper.getWidth()/2).reduced(7));
     attackSlider.setBounds(adsrAreaUpper.reduced(7));
+    
+    audioProcessor.waveViewer.setBounds(waveArea);
 
 }
 

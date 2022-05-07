@@ -21,7 +21,7 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ), apvts (*this, nullptr, "Parameters", FractalSynthesisAudioProcessor::createParams())
+                       ), apvts (*this, nullptr, "Parameters", FractalSynthesisAudioProcessor::createParams()),waveViewer(1)
 #endif
 {
 
@@ -59,7 +59,8 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
 
     apvts.addParameterListener("INITIAL_POINT_Y", this);
 
-
+    waveViewer.setRepaintRate(30);
+    waveViewer.setBufferSize(256);
 
 }
 
@@ -275,7 +276,7 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
   
         synth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     }
-
+    waveViewer.pushBuffer(buffer);
     midiMessages.clear();
 
 }
