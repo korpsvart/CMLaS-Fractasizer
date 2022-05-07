@@ -20,6 +20,9 @@ SynthVoice::SynthVoice(int numPartials)
     for (size_t i = 0; i < numPartials; i++)
     {
         processorChains.push_back(juce::dsp::ProcessorChain<juce::dsp::Oscillator<float>, juce::dsp::Gain<float>, juce::dsp::Panner<float>>{});
+
+        adsrParams.push_back(juce::ADSR::Parameters());
+        adsr.push_back(juce::ADSR());
     }
     for (size_t i = 0; i < numPartials; i++)
     {
@@ -72,16 +75,34 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     for (int i = 0; i < numPartials; ++i)
     {
         processorChains[i].get<oscIndex>().setFrequency(freq * detuneFactors[i]);
+
+        adsr[i].noteOn();
     }
 
-    adsr.noteOn();
+
 }
 
 void SynthVoice::stopNote(float velocity, bool allowTailOff)
 {
-    adsr.noteOff();
 
-    if (!allowTailOff || !adsr.isActive())
+    for (int i = 0; i < numPartials; ++i)
+    {
+        adsr[i].noteOff();
+    }
+
+
+    bool active = false;
+    for (int i = 0; i < numPartials; ++i)
+    {
+        active |= adsr[i].isActive();
+    }
+
+    if (!active)
+        clearCurrentNote();
+
+
+
+    if (!allowTailOff || !active)
         clearCurrentNote();
 }
 
@@ -122,6 +143,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
             {
                 auto max = juce::jmin ((size_t) numSamples - pos, lfoUpdateCounter);
                 auto block = audioBlock.getSubBlock (pos, max);
+                
      
                 juce::dsp::ProcessContextReplacing<float> context (block);
 
@@ -130,6 +152,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
                 for (int i = 0; i < numPartials; ++i)
                 {
                     processorChains[i].process(context);
+                    adsr[i].applyEnvelopeToBuffer(synthBuffer, pos, max);
                 }
                 
                 pos += max;
@@ -147,7 +170,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
 
 
         
-    adsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
+    //adsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
 
     //Add the local temp buffer to the final audio output buffer
 
@@ -157,7 +180,14 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
 
     }
 
-    if (!adsr.isActive())
+
+    bool active = false;
+    for (int i = 0; i < numPartials; ++i)
+    {
+        active |= adsr[i].isActive();
+    }
+
+    if (!active)
         clearCurrentNote();
 
 
@@ -176,7 +206,13 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 
     //Prepare oscillator (passing ProcessSpec)
 
-    adsr.setSampleRate(sampleRate);
+
+    for (int i = 0; i < numPartials; ++i)
+    {
+        adsr[i].setSampleRate(sampleRate);
+    }
+
+
 
     //gain.setGainLinear(0.3f);
 
@@ -258,13 +294,13 @@ void SynthVoice::setLFODepths(const std::vector<double>& lfoDepths)
     }
 }
 
-void SynthVoice::updateADSR(const float attack, const float decay, const float sustain, const float release)
+void SynthVoice::updateADSR(int i, const float attack, const float decay, const float sustain, const float release)
 {
-    adsrParams.attack = attack;
-    adsrParams.decay = decay;
-    adsrParams.sustain = sustain;
-    adsrParams.release = release;
-    adsr.setParameters(adsrParams);
+    adsrParams[i].attack = attack;
+    adsrParams[i].decay = decay;
+    adsrParams[i].sustain = sustain;
+    adsrParams[i].release = release;
+    adsr[i].setParameters(adsrParams[i]);
 }
 
 void SynthVoice::setWaveType(const int partialIndex, const int choice)
@@ -273,13 +309,13 @@ void SynthVoice::setWaveType(const int partialIndex, const int choice)
 
     switch (choice)
     {
-    case 0: //Sin wave
+    case SINE: //Sin wave
         processorChains[partialIndex].get<oscIndex>().initialise([](float x) { return std::sin(x); });
         break;
-    case 1: //Saw wave
+    case SAW: //Saw wave
         processorChains[partialIndex].get<oscIndex>().initialise([](float x) { return x / juce::MathConstants<float>::pi; });
         break;
-    case 2: //Square wave
+    case SQUARE: //Square wave
         processorChains[partialIndex].get<oscIndex>().initialise([](float x) { return x < 0.0f ? -1.0f : 1.0f; });
         break;
     }

@@ -46,7 +46,7 @@ public:
 
     void setLFODepths(const std::vector<double>& lfoDepths);
 
-    void updateADSR(const float attack, const float decay, const float sustain, const float release);
+    void updateADSR(int i, const float attack, const float decay, const float sustain, const float release);
 
 
     enum Pippo
@@ -64,13 +64,19 @@ public:
 
 private:
 
+    enum waveTypes
+    {
+        SINE,
+        SAW,
+        SQUARE
+    };
+
     int numPartials;
 
     std::vector< juce::dsp::ProcessorChain<juce::dsp::Oscillator<float>, juce::dsp::Gain<float>, juce::dsp::Panner<float>>> processorChains;
 
-
-    juce::ADSR adsr;
-    juce::ADSR::Parameters adsrParams;
+    std::vector<juce::ADSR> adsr;
+    std::vector<juce::ADSR::Parameters> adsrParams;
     juce::AudioBuffer<float> synthBuffer; //Local buffer to temporarily store synth output
 
 
@@ -106,5 +112,7 @@ private:
     std::vector<float> detuneFactors; //default is harmonic
 
     bool isPrepared = false;
+
+    
 
 };

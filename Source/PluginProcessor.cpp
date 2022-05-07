@@ -69,6 +69,15 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
 
     apvts.addParameterListener("INITIAL_POINT_Y", this);
 
+    //I also use the callback to update the wavetype instead of doing it inside process block
+    //Since it would probably be a bit computationally heavy, and we don't care too much aboute response time
+    //for these params
+    apvts.addParameterListener("WAVE_TYPE0", this);
+    apvts.addParameterListener("WAVE_TYPE1", this);
+    apvts.addParameterListener("WAVE_TYPE2", this);
+    apvts.addParameterListener("WAVE_TYPE3", this);
+
+
     /*
     waveViewer.setRepaintRate(30);
     waveViewer.setBufferSize(256);
@@ -252,7 +261,12 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     // ADSR
                     // LFO ecc...
 
-                    updateADSR(i, voice);
+
+                    for (size_t j = 0; j < NUM_PARTIALS; j++)
+                    {
+                        updateADSR(j, voice);
+                    }
+
 
                     //As an example, use X to control frequency detune and Y to control amplitude
 
@@ -331,6 +345,22 @@ void FractalSynthesisAudioProcessor::parameterChanged(const juce::String& parame
     else if (parameterID.compare("INITIAL_POINT_X")==0 || parameterID.compare("INITIAL_POINT_Y")==0)
     {
         updatedFractal = true;
+    }
+
+
+    if (parameterID.contains("WAVE_TYPE"))
+    {
+        int index = parameterID.getLastCharacter() - '0';
+        int newChoice = newValue;
+
+        for (int i = 0; i < synth->getNumVoices(); ++i)
+        {
+            if (auto voice = dynamic_cast<SynthVoice*>(synth->getVoice(i)))
+            {
+
+                voice->setWaveType(index, newChoice);
+            }
+        }
     }
 }
 
@@ -485,7 +515,7 @@ void FractalSynthesisAudioProcessor::updateADSR(int partialIndex, SynthVoice* vo
     auto& sustain = *apvts.getRawParameterValue("SUSTAIN" + indexString);
     auto& release = *apvts.getRawParameterValue("RELEASE" + indexString);
 
-    voice->updateADSR(attack.load(), decay.load(), sustain.load(), release.load());
+    voice->updateADSR(partialIndex, attack.load(), decay.load(), sustain.load(), release.load());
 }
 
 

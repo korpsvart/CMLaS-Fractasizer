@@ -68,18 +68,21 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
 
  
         waveTypeLabels[i]->attachToComponent(waveTypeComboBoxes[i], false);
-        waveTypeComboBoxes[i]->addItem("sin", 1);
-        waveTypeComboBoxes[i]->addItem("saw", 1);
-        waveTypeComboBoxes[i]->addItem("square", 1);
+        waveTypeLabels[i]->setJustificationType(juce::Justification::centred);
+        waveTypeLabels[i]->setText("Wave type", juce::dontSendNotification);
+        waveTypeComboBoxes[i]->addItem("Sine", 1);
+        waveTypeComboBoxes[i]->addItem("Saw", 2);
+        waveTypeComboBoxes[i]->addItem("Square", 3);
 
-        attackAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "ATTACK", *attackSliders[i]);
+        attackAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "ATTACK" + std::to_string(i), *attackSliders[i]);
 
-        sustainAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "SUSTAIN", *sustainSliders[i]);
+        sustainAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "SUSTAIN" + std::to_string(i), *sustainSliders[i]);
 
-        decayAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "DECAY", *decaySliders[i]);
+        decayAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "DECAY" + std::to_string(i), *decaySliders[i]);
 
-        releaseAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RELEASE", *releaseSliders[i]);
+        releaseAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RELEASE" + std::to_string(i), *releaseSliders[i]);
 
+        waveTypeAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, "WAVE_TYPE" + std::to_string(i), *waveTypeComboBoxes[i]);
 
     }
 

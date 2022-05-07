@@ -92,6 +92,8 @@ private:
     std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, 4> sustainAttachments;
 
     std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, 4> releaseAttachments;
+
+    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment>, 4> waveTypeAttachments;
     
     /*
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
