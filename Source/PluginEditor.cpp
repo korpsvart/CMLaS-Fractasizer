@@ -23,7 +23,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     fractalFunctionComboBox.addItem("Burning Ship Set", 2);
     fractalFunctionComboBox.addItem("Tricorn", 3);
 
-
+    //addAndMakeVisible(audioProcessor.waveViewer);
 
 
     for (size_t i = 0; i < 4; i++)
@@ -40,6 +40,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
         sustainLabels.add(new juce::Label());
         releaseLabels.add(new juce::Label());
         waveTypeLabels.add(new juce::Label());
+        
 
         setSliderStyle(attackSliders[i]);
         setSliderStyle(decaySliders[i]);
@@ -65,6 +66,11 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
         releaseLabels[i]->setJustificationType(juce::Justification::centred);
         releaseLabels[i]->attachToComponent(releaseSliders[i], false);
 
+ 
+        waveTypeLabels[i]->attachToComponent(waveTypeComboBoxes[i], false);
+        waveTypeComboBoxes[i]->addItem("sin", 1);
+        waveTypeComboBoxes[i]->addItem("saw", 1);
+        waveTypeComboBoxes[i]->addItem("square", 1);
 
         attackAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "ATTACK", *attackSliders[i]);
 
@@ -119,10 +125,13 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
         addAndMakeVisible(releaseSliders[i]);
 
         addAndMakeVisible(waveTypeComboBoxes[i]);
+
+       // addAndMakeVisible(waveVisualizerBoxes[i]);
+
     }
 
 
-    setSize(900, 900);
+    setSize(700, 700);
 
 }
 
@@ -233,7 +242,7 @@ void FractalSynthesisAudioProcessorEditor::buildOscSubArea(int index, juce::Rect
     auto tempBounds = juce::Rectangle<int>(bounds); //create a copy so we don't modify the variable (needed by the paint method to draw the rectangle)
     tempBounds = tempBounds.reduced(40);
     auto oscADSRArea = tempBounds.removeFromLeft(tempBounds.getWidth() / 2);
-    auto oscWaveTypeArea = tempBounds.removeFromTop(tempBounds.getHeight() / 2);
+    auto oscWaveTypeArea = tempBounds.removeFromTop(tempBounds.getHeight() / 2.5);
     auto oscWaveVisualizerArea = tempBounds;
     auto oscADArea = oscADSRArea.removeFromTop(oscADSRArea.getHeight() / 2);
     auto oscSRArea = oscADSRArea;
@@ -244,4 +253,8 @@ void FractalSynthesisAudioProcessorEditor::buildOscSubArea(int index, juce::Rect
     releaseSliders[index]->setBounds(oscSRArea);
 
     waveTypeComboBoxes[index]->setBounds(oscWaveTypeArea);
+    //waveVisualizerBoxes[index]->setBounds(oscWaveVisualizerArea);
 }
+
+
+    
