@@ -77,7 +77,7 @@ private:
 
     std::vector<juce::ADSR> adsr;
     std::vector<juce::ADSR::Parameters> adsrParams;
-    juce::AudioBuffer<float> synthBuffer; //Local buffer to temporarily store synth output
+    juce::OwnedArray<juce::AudioBuffer<float>> synthBuffers; //Local buffers to temporarily store synth output (one for each partial)
 
 
 

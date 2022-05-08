@@ -23,6 +23,8 @@ SynthVoice::SynthVoice(int numPartials)
 
         adsrParams.push_back(juce::ADSR::Parameters());
         adsr.push_back(juce::ADSR());
+
+        synthBuffers.add(new juce::AudioBuffer<float>());
     }
     for (size_t i = 0; i < numPartials; i++)
     {
@@ -66,8 +68,6 @@ bool SynthVoice::canPlaySound(juce::SynthesiserSound* sound)
 
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* sound, int currentPitchWheelPosition)
 {
-    //osc.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber)*harmonicN);
-
 
     auto freq = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
 
@@ -97,11 +97,6 @@ void SynthVoice::stopNote(float velocity, bool allowTailOff)
         active |= adsr[i].isActive();
     }
 
-    if (!active)
-        clearCurrentNote();
-
-
-
     if (!allowTailOff || !active)
         clearCurrentNote();
 }
@@ -124,37 +119,38 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
         return;
 
 
-    //Set the size for the local temp buffer (only re-allocate if needed)
-    synthBuffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
-    //clear the local temp buffer
-    synthBuffer.clear();
-
-
 
 
     //AudioBlock it's just an alias for the given buffer needed by DSP classes (so by modifying
     //the AudioBlock we are actually modifying the given buffer)
-    juce::dsp::AudioBlock<float> audioBlock{ synthBuffer };
+    juce::OwnedArray< juce::dsp::AudioBlock<float>> audioBlocks;
 
-    //osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
-    //panner.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    for (size_t i = 0; i < numPartials; i++)
+    {
+        //Set the size for the local temp buffer (only re-allocate if needed)
+        synthBuffers[i]->setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
+        //clear the local temp buffer
+        synthBuffers[i]->clear();
+        audioBlocks.add(new juce::dsp::AudioBlock<float>{ *synthBuffers[i]});
+    }
 
     for (size_t pos = 0; pos < (size_t) numSamples;)
             {
                 auto max = juce::jmin ((size_t) numSamples - pos, lfoUpdateCounter);
-                auto block = audioBlock.getSubBlock (pos, max);
-                
-     
-                juce::dsp::ProcessContextReplacing<float> context (block);
 
-                //gain.process (context);
 
                 for (int i = 0; i < numPartials; ++i)
                 {
+                    auto block = audioBlocks[i]->getSubBlock(pos, max);
+
+
+                    juce::dsp::ProcessContextReplacing<float> context(block);
+
                     processorChains[i].process(context);
-                    adsr[i].applyEnvelopeToBuffer(synthBuffer, pos, max);
+
+                    adsr[i].applyEnvelopeToBuffer(*synthBuffers[i], pos, max);
                 }
-                
+
                 pos += max;
                 lfoUpdateCounter -= max;
 
@@ -168,15 +164,14 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
                 }
             }
 
-
-        
-    //adsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
-
-    //Add the local temp buffer to the final audio output buffer
-
     for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
     {
-        outputBuffer.addFrom(channel, startSample, synthBuffer, channel, 0, numSamples);
+        for (size_t i = 0; i < numPartials; i++)
+        {
+            //Add the local temp buffer to the final audio output buffer
+            outputBuffer.addFrom(channel, startSample, *synthBuffers[i], channel, 0, numSamples);
+
+        }
 
     }
 
@@ -189,7 +184,6 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
 
     if (!active)
         clearCurrentNote();
-
 
 }
 
@@ -213,9 +207,6 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     }
 
 
-
-    //gain.setGainLinear(0.3f);
-
     juce::dsp::ProcessSpec spec;
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;
@@ -228,16 +219,11 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
         processorChains[i].prepare(spec);
     }
 
-
-    //osc.prepare(spec);
     for (int i = 0; i < numPartials; i++)
     {
         lfos[i].
             prepare({ spec.sampleRate / lfoUpdateRate, spec.maximumBlockSize, spec.numChannels });
     }
-    //gain.prepare(spec);
-    //panner.prepare(spec);
-
 
     isPrepared = true;
 }

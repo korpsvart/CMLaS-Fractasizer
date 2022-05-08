@@ -516,6 +516,8 @@ void FractalSynthesisAudioProcessor::updateADSR(int partialIndex, SynthVoice* vo
     auto& release = *apvts.getRawParameterValue("RELEASE" + indexString);
 
     voice->updateADSR(partialIndex, attack.load(), decay.load(), sustain.load(), release.load());
+
+
 }
 
 
