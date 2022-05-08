@@ -63,8 +63,13 @@ public:
 
     juce::AudioProcessorValueTreeState apvts;
 
-    //juce::AudioVisualiserComponent waveViewer;
-
+    juce::AudioVisualiserComponent waveViewer1;
+    juce::AudioVisualiserComponent waveViewer2;
+    juce::AudioVisualiserComponent waveViewer3;
+    juce::AudioVisualiserComponent waveViewer4;
+    
+    juce::OwnedArray<juce::AudioVisualiserComponent> waveVisualisers;
+ 
 private:
 
 
@@ -113,7 +118,7 @@ private:
 
 
     bool updatedFractal = true;
-
+   
 
 
     //==============================================================================

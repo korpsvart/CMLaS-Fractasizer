@@ -21,7 +21,7 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ), apvts (*this, nullptr, "Parameters", FractalSynthesisAudioProcessor::createParams()) //waveViewer(1)
+                       ), apvts (*this, nullptr, "Parameters", FractalSynthesisAudioProcessor::createParams()), waveViewer1(1), waveViewer2(1), waveViewer3(1), waveViewer4(1)//consutructors of the audio components
 #endif
 {
 
@@ -50,9 +50,19 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
     */
     synth = new juce::Synthesiser();
     synth->addSound(new SynthSound());
+    
+    //Create the visualiter components and add them to ownedArray
+    waveVisualisers.add(&waveViewer1);
+    waveVisualisers.add(&waveViewer2);
+    waveVisualisers.add(&waveViewer3);
+    waveVisualisers.add(&waveViewer4);
+    
     for (size_t voice = 0; voice < voicesNumber; voice++)
     {
         synth->addVoice(new SynthVoice(NUM_PARTIALS));
+        //set properties
+        waveVisualisers[voice]->setBufferSize(256);
+        waveVisualisers[voice]->setRepaintRate(30);
     }
 
 
@@ -253,7 +263,7 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
             for (int i = 0; i < synth->getNumVoices(); ++i)
             {
-
+                
 
                 if (auto voice = dynamic_cast<SynthVoice*>(synth->getVoice(i)))
                 {
@@ -265,6 +275,8 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     for (size_t j = 0; j < NUM_PARTIALS; j++)
                     {
                         updateADSR(j, voice);
+                        //I read the buffers for the visualiser here, not completely sure why
+                        waveVisualisers[j]->pushBuffer(*voice->synthBuffers[j]);
                     }
 
 
@@ -281,7 +293,10 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
                     voice->setFreqDetunes(freqs);
                     voice->setLFORates(gains);
+                    
                 }
+               
+            
             }
   
         synth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());

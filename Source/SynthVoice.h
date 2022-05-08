@@ -60,7 +60,9 @@ public:
     void setWaveType(const int partialIndex, const int choice);
 
     void applyLFO(int i);
-
+    
+    //had to make this buffer public to be able to access in the processor. 
+    juce::OwnedArray<juce::AudioBuffer<float>> synthBuffers; //Local buffers to temporarily store synth output (one for each partial)
 
 private:
 
@@ -77,7 +79,7 @@ private:
 
     std::vector<juce::ADSR> adsr;
     std::vector<juce::ADSR::Parameters> adsrParams;
-    juce::OwnedArray<juce::AudioBuffer<float>> synthBuffers; //Local buffers to temporarily store synth output (one for each partial)
+    //juce::OwnedArray<juce::AudioBuffer<float>> synthBuffers; //Local buffers to temporarily store synth output (one for each partial)
 
 
 

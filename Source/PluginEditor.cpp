@@ -129,7 +129,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
 
         addAndMakeVisible(waveTypeComboBoxes[i]);
 
-       // addAndMakeVisible(waveVisualizerBoxes[i]);
+       addAndMakeVisible(audioProcessor.waveVisualisers[i]);
 
     }
 
@@ -256,7 +256,7 @@ void FractalSynthesisAudioProcessorEditor::buildOscSubArea(int index, juce::Rect
     releaseSliders[index]->setBounds(oscSRArea);
 
     waveTypeComboBoxes[index]->setBounds(oscWaveTypeArea);
-    //waveVisualizerBoxes[index]->setBounds(oscWaveVisualizerArea);
+    audioProcessor.waveVisualisers[index]->setBounds(oscWaveVisualizerArea);
 }
 
 
