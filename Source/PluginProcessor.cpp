@@ -21,7 +21,7 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ), apvts (*this, nullptr, "Parameters", FractalSynthesisAudioProcessor::createParams()), waveViewer1(1), waveViewer2(1), waveViewer3(1), waveViewer4(1)//consutructors of the audio components
+                       ), apvts (*this, nullptr, "Parameters", FractalSynthesisAudioProcessor::createParams())//consutructors of the audio components
 #endif
 {
 
@@ -52,17 +52,19 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
     synth->addSound(new SynthSound());
     
     //Create the visualiter components and add them to ownedArray
-    waveVisualisers.add(&waveViewer1);
-    waveVisualisers.add(&waveViewer2);
-    waveVisualisers.add(&waveViewer3);
-    waveVisualisers.add(&waveViewer4);
+    waveVisualisers.add(new juce::AudioVisualiserComponent(1));
+    waveVisualisers.add(new juce::AudioVisualiserComponent(1));
+    waveVisualisers.add(new juce::AudioVisualiserComponent(1));
+    waveVisualisers.add(new juce::AudioVisualiserComponent(1));
     
     for (size_t voice = 0; voice < voicesNumber; voice++)
     {
         synth->addVoice(new SynthVoice(NUM_PARTIALS));
         //set properties
-        waveVisualisers[voice]->setBufferSize(256);
+        waveVisualisers[voice]->setBufferSize(512);
+        waveVisualisers[voice]->setSamplesPerBlock(256);
         waveVisualisers[voice]->setRepaintRate(30);
+        waveVisualisers[voice]->setColours(juce::Colours::black, juce::Colours::deepskyblue);
     }
 
 
@@ -270,6 +272,7 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     // Osc controls
                     // ADSR
                     // LFO ecc...
+
 
 
                     for (size_t j = 0; j < NUM_PARTIALS; j++)
