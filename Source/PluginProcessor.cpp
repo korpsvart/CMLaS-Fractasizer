@@ -60,11 +60,17 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
     for (size_t voice = 0; voice < voicesNumber; voice++)
     {
         synth->addVoice(new SynthVoice(NUM_PARTIALS));
-        //set properties
-        waveVisualisers[voice]->setBufferSize(512);
-        waveVisualisers[voice]->setSamplesPerBlock(256);
-        waveVisualisers[voice]->setRepaintRate(30);
-        waveVisualisers[voice]->setColours(juce::Colours::black, juce::Colours::deepskyblue);
+
+    }
+
+
+    //set properties
+    for (size_t i = 0; i < NUM_PARTIALS; i++)
+    {
+        waveVisualisers[i]->setBufferSize(512);
+        waveVisualisers[i]->setSamplesPerBlock(256);
+        waveVisualisers[i]->setRepaintRate(30);
+        waveVisualisers[i]->setColours(juce::Colours::black, juce::Colours::deepskyblue);
     }
 
 

@@ -79,7 +79,7 @@ private:
 
     //Define the number of polyphonies (max number of MIDI notes that can be played at the same time)
     //Should be constant during the execution
-    static const int voicesNumber = 4;
+    static const int voicesNumber = 5;
 
     std::vector<juce::Synthesiser*> synths;
 
