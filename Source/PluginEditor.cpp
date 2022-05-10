@@ -23,7 +23,20 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     fractalFunctionComboBox.addItem("Burning Ship Set", 2);
     fractalFunctionComboBox.addItem("Tricorn", 3);
 
-    //addAndMakeVisible(audioProcessor.waveViewer);
+
+    xLabel.setText("X", juce::dontSendNotification);
+    yLabel.setText("Y",juce::dontSendNotification);
+    inputPlaneLabel.setText("Input plane", juce::dontSendNotification);
+
+    xLabel.setJustificationType(juce::Justification::centred);
+    xLabel.attachToComponent(&initialPointXSlider, true);
+
+    yLabel.setJustificationType(juce::Justification::centred);
+    yLabel.attachToComponent(&initialPointYSlider, true);
+
+    inputPlaneLabel.setJustificationType(juce::Justification::centred);
+    inputPlaneLabel.attachToComponent(&inputPlaneComponent, false);
+
 
 
     for (size_t i = 0; i < 4; i++)
@@ -47,8 +60,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
         setSliderStyle(sustainSliders[i]);
         setSliderStyle(releaseSliders[i]);
 
-       
-        //attackLabels[i]->setBorderSize(3);
+
         attackLabels[i]->setText("Attack", juce::dontSendNotification);
         attackLabels[i]->setJustificationType(juce::Justification::centred);
         attackLabels[i]->attachToComponent(attackSliders[i], false);
@@ -56,6 +68,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
         decayLabels[i]->setText("Decay", juce::dontSendNotification);
         decayLabels[i]->setJustificationType(juce::Justification::centred);
         decayLabels[i]->attachToComponent(decaySliders[i], false);
+
 
         sustainLabels[i]->setText("Sustain", juce::dontSendNotification);
         sustainLabels[i]->setJustificationType(juce::Justification::centred);
@@ -149,13 +162,6 @@ void FractalSynthesisAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     g.setOpacity(0.4);
-    g.setColour(juce::Colours::floralwhite);
-
-    //rectangles around sliders and inputPlane
-    g.drawRoundedRectangle(initialPointXSliderArea.toFloat().reduced(15), 5.0f, 4.0f);
-    g.drawRoundedRectangle(initialPointYSliderArea.toFloat().reduced(15), 5.0f, 4.0f);
-    g.drawRoundedRectangle(inputPlaneArea.toFloat().reduced(15), 5.0f, 4.0f);
-
     //background images
     g.drawImageWithin(currentImage, 0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight(),
         juce::RectanglePlacement::fillDestination);
@@ -177,7 +183,19 @@ void FractalSynthesisAudioProcessorEditor::paint (juce::Graphics& g)
     g.drawRoundedRectangle(osc4Area.toFloat().reduced(15), 5.0f, 4.0f);
     g.drawText("OSC 4", osc4Area.toFloat().removeFromTop(10), juce::Justification::left);
 
-    g.drawRect(inputPlaneComponent.getX(), inputPlaneComponent.getY(), inputPlaneComponent.getWidth(), inputPlaneComponent.getHeight());
+
+    g.drawRoundedRectangle(fractalArea.toFloat(), 5.0f, 4.0f);
+    //rectangles around sliders and inputPlane
+    //g.drawRoundedRectangle(initialPointXSliderArea.toFloat(), 5.0f, 4.0f);
+    //g.drawRoundedRectangle(initialPointYSliderArea.toFloat(), 5.0f, 4.0f);
+    g.drawRoundedRectangle(inputPlaneArea.toFloat(), 5.0f, 3.0f);
+
+
+    g.setColour(juce::Colours::darkorange);
+    for (size_t i = 0; i < 4; i++)
+    {
+        g.drawRoundedRectangle(audioProcessor.waveVisualisers[i]->getBounds().expanded(3).toFloat(), 5.0f, 2.0f);
+    }
 
 
 }
@@ -204,16 +222,8 @@ void FractalSynthesisAudioProcessorEditor::resized()
     buildOscSubArea(2, osc3Area);
     buildOscSubArea(3, osc4Area);
 
-    fractalFunctionComboBox.setBounds(fractalArea.removeFromLeft(fractalArea.getWidth()/3).reduced(5));
+    buildFractalArea(fractalArea);
 
-    auto inputPlaneArea= fractalArea.removeFromLeft(fractalArea.getWidth() / 2).reduced(5);
-    inputPlaneComponent.setBounds(inputPlaneArea);
-   
-    auto initialPointXSliderArea = (fractalArea.removeFromTop(fractalArea.getHeight() / 2).reduced(5));
-    initialPointXSlider.setBounds(initialPointXSliderArea);
-
-    auto initialPointYSliderArea = (fractalArea.reduced(5));
-    initialPointYSlider.setBounds(initialPointYSliderArea);
     
  
 
@@ -229,7 +239,6 @@ void FractalSynthesisAudioProcessorEditor::comboBoxChanged(juce::ComboBox* combo
         else
             mImageComponent.setImage(tricornImage, juce::RectanglePlacement::stretchToFit);
     */
-
 
     if (combo->getSelectedId() == 1)
         currentImage = mandelbrotImage;
@@ -250,6 +259,8 @@ void FractalSynthesisAudioProcessorEditor::setSliderStyle(juce::Slider* slider)
     slider->setSliderStyle(juce::Slider::Rotary);
     slider->setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
     slider->setPopupDisplayEnabled(true, true, this);
+    slider->setColour(juce::Slider::ColourIds::rotarySliderFillColourId
+        , juce::Colours::ghostwhite);
     slider->setTextValueSuffix(" seconds");
 
 }
@@ -258,22 +269,43 @@ void FractalSynthesisAudioProcessorEditor::buildOscSubArea(int index, juce::Rect
 {
 
     auto tempBounds = juce::Rectangle<int>(bounds); //create a copy so we don't modify the variable (needed by the paint method to draw the rectangle)
-    tempBounds = tempBounds.reduced(40);
+    tempBounds = tempBounds.reduced(35);
     auto oscADSRArea = tempBounds.removeFromLeft(tempBounds.getWidth() / 2);
     auto oscWaveTypeArea = tempBounds.removeFromTop(tempBounds.getHeight() / 2.5);
     auto oscWaveVisualizerArea = tempBounds;
     auto oscADArea = oscADSRArea.removeFromTop(oscADSRArea.getHeight() / 2);
     auto oscSRArea = oscADSRArea;
 
-    attackSliders[index]->setBounds(oscADArea.removeFromLeft(oscADArea.getWidth() / 2));
-    decaySliders[index]->setBounds(oscADArea);
-    sustainSliders[index]->setBounds(oscSRArea.removeFromLeft(oscSRArea.getWidth() / 2));
-    releaseSliders[index]->setBounds(oscSRArea);
+    attackSliders[index]->setBounds(oscADArea.removeFromLeft(oscADArea.getWidth() / 2).reduced(3));
+    decaySliders[index]->setBounds(oscADArea.reduced(3));
+    sustainSliders[index]->setBounds(oscSRArea.removeFromLeft(oscSRArea.getWidth() / 2).reduced(3));
+    releaseSliders[index]->setBounds(oscSRArea.reduced(3));
 
-    waveTypeComboBoxes[index]->setBounds(oscWaveTypeArea);
-    audioProcessor.waveVisualisers[index]->setBounds(oscWaveVisualizerArea);
+    waveTypeComboBoxes[index]->setBounds(oscWaveTypeArea.withHeight(oscWaveTypeArea.getHeight() * 0.95));
+    audioProcessor.waveVisualisers[index]->setBounds(oscWaveVisualizerArea.withHeight(oscWaveVisualizerArea.getHeight()*0.95).reduced(3));
     
 }
+
+
+void FractalSynthesisAudioProcessorEditor::buildFractalArea(juce::Rectangle<int> fractalArea)
+{
+    auto tempBounds = juce::Rectangle<int>(fractalArea).reduced(10);
+    //fractalFunctionComboBox.setBounds(fractalArea.removeFromLeft(fractalArea.getWidth() / 3).reduced(5));
+
+    inputPlaneArea = tempBounds.removeFromLeft(tempBounds.getWidth() * 0.33).reduced(5);
+    inputPlaneComponent.setBounds(inputPlaneArea.reduced(3));
+
+    auto comboBoxArea = tempBounds.removeFromTop(tempBounds.getHeight() * 0.33).reduced(5);
+    fractalFunctionComboBox.setBounds(comboBoxArea);
+
+    initialPointXSliderArea = (tempBounds.removeFromTop(tempBounds.getHeight() * 0.5).reduced(5));
+    initialPointXSlider.setBounds(initialPointXSliderArea.reduced(5));
+
+    initialPointYSliderArea = (tempBounds.reduced(5));
+    initialPointYSlider.setBounds(initialPointYSliderArea.reduced(5));
+
+}
+
 
 
     

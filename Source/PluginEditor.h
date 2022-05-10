@@ -37,6 +37,8 @@ private:
     void setSliderStyle(juce::Slider* slider);
 
     void buildOscSubArea(int index, juce::Rectangle<int> bounds);
+
+    void buildFractalArea(juce::Rectangle<int> bounds);
     
     juce::Image mandelbrotImage;
     juce::Image burningShipImage;
@@ -78,6 +80,10 @@ private:
 
     InputPlane inputPlaneComponent;
 
+    juce::Label xLabel;
+    juce::Label yLabel;
+    juce::Label inputPlaneLabel;
+
     //Attachments (must be declared after the GUI elements to avoid crashes when closing the plugin)
    
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> fractalComboBoxAttachment;
@@ -112,6 +118,7 @@ private:
     juce::Rectangle<int> inputPlaneArea;
     juce::Rectangle<int> initialPointXSliderArea;
     juce::Rectangle<int> initialPointYSliderArea;
+    juce::OwnedArray<juce::Rectangle<int>> waveVisualizerAreas;
     
 
 
