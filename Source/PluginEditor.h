@@ -75,9 +75,6 @@ private:
     juce::OwnedArray<juce::ComboBox> waveTypeComboBoxes;
 
 
-    //juce::OwnedArray<juce::ComboBox> waveVisualizerBoxes;
-
-
     InputPlane inputPlaneComponent;
 
     juce::Label xLabel;
@@ -102,13 +99,6 @@ private:
 
     std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment>, 4> waveTypeAttachments;
     
-    /*
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sustainAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> decayAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
-
-    */
 
     juce::Rectangle<int> osc1Area;
     juce::Rectangle<int> osc2Area;
@@ -118,7 +108,6 @@ private:
     juce::Rectangle<int> inputPlaneArea;
     juce::Rectangle<int> initialPointXSliderArea;
     juce::Rectangle<int> initialPointYSliderArea;
-    juce::OwnedArray<juce::Rectangle<int>> waveVisualizerAreas;
     
 
 

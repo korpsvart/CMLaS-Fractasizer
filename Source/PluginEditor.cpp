@@ -162,7 +162,7 @@ void FractalSynthesisAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     g.setOpacity(0.4);
-    //background images
+    //background image
     g.drawImageWithin(currentImage, 0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight(),
         juce::RectanglePlacement::fillDestination);
 
@@ -185,9 +185,6 @@ void FractalSynthesisAudioProcessorEditor::paint (juce::Graphics& g)
 
 
     g.drawRoundedRectangle(fractalArea.toFloat(), 5.0f, 4.0f);
-    //rectangles around sliders and inputPlane
-    //g.drawRoundedRectangle(initialPointXSliderArea.toFloat(), 5.0f, 4.0f);
-    //g.drawRoundedRectangle(initialPointYSliderArea.toFloat(), 5.0f, 4.0f);
     g.drawRoundedRectangle(inputPlaneArea.toFloat(), 5.0f, 3.0f);
 
 
@@ -231,14 +228,6 @@ void FractalSynthesisAudioProcessorEditor::resized()
 
 void FractalSynthesisAudioProcessorEditor::comboBoxChanged(juce::ComboBox* combo){
     
-    /*
-        if (combo->getSelectedId()==1)
-            mImageComponent.setImage(mandelbrotImage, juce::RectanglePlacement::stretchToFit);
-        if (combo->getSelectedId()==2)
-            mImageComponent.setImage(burningShipImage, juce::RectanglePlacement::stretchToFit);
-        else
-            mImageComponent.setImage(tricornImage, juce::RectanglePlacement::stretchToFit);
-    */
 
     if (combo->getSelectedId() == 1)
         currentImage = mandelbrotImage;
@@ -290,7 +279,6 @@ void FractalSynthesisAudioProcessorEditor::buildOscSubArea(int index, juce::Rect
 void FractalSynthesisAudioProcessorEditor::buildFractalArea(juce::Rectangle<int> fractalArea)
 {
     auto tempBounds = juce::Rectangle<int>(fractalArea).reduced(10);
-    //fractalFunctionComboBox.setBounds(fractalArea.removeFromLeft(fractalArea.getWidth() / 3).reduced(5));
 
     inputPlaneArea = tempBounds.removeFromLeft(tempBounds.getWidth() * 0.33).reduced(5);
     inputPlaneComponent.setBounds(inputPlaneArea.reduced(3));

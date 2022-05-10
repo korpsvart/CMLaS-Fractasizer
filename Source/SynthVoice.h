@@ -103,7 +103,7 @@ private:
     
     //juce::dsp::Gain<float> gain;
 
-    float fixedGain = 0.5f;
+    std::vector<float> fixedGains;
 
     //juce::dsp::Panner<float> panner;
 

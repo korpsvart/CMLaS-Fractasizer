@@ -35,7 +35,8 @@ SynthVoice::SynthVoice(int numPartials)
     {
 
         processorChains[i].get<oscIndex>().initialise([](float x) { return std::sin(x); });
-        processorChains[i].get<gainIndex>().setGainLinear(0.5f); //just a default value
+        processorChains[i].get<gainIndex>().setGainLinear(0.5f/(i+1)); //weighted amplitude of the partial (decreasing with the "order")
+        fixedGains.push_back(0.5f / (i + 1)); //weighted amplitude of the partial
 
         lfos[i].setFrequency(3); //just a default value
     }
@@ -190,8 +191,8 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
 void SynthVoice::applyLFO(int i)
 {
     auto lfoOut = lfos[i].processSample(0.0f);
-    auto depth = fixedGain * lfoDepths[i];
-    auto gainVariation = juce::jmap(lfoOut, -1.0f, 1.0f, fixedGain - depth, fixedGain + depth);
+    auto depth = fixedGains[i] * lfoDepths[i];
+    auto gainVariation = juce::jmap(lfoOut, -1.0f, 1.0f, fixedGains[i] - depth, fixedGains[i] + depth);
     processorChains[i].get<gainIndex>().setGainLinear(gainVariation);
 }
 
@@ -237,14 +238,12 @@ void SynthVoice::setHarmonicN(float harmonicN)
 
 void SynthVoice::setGain(float gainValue)
 {
+    //Not implemented for now
 
-    //gain.setGainLinear(gainValue);
-    //processorChain.get<gainIndex>().setGainLinear(gainValue);
 }
 
 void SynthVoice::setPan(float panValue)
 {
-    //panner.setPan(panValue);
 
     for (int i = 0; i < numPartials; ++i)
     {

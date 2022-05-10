@@ -79,7 +79,7 @@ private:
 
     //Define the number of polyphonies (max number of MIDI notes that can be played at the same time)
     //Should be constant during the execution
-    static const int voicesNumber = 5;
+    static const int voicesNumber = 10;
 
     std::vector<juce::Synthesiser*> synths;
 
@@ -88,8 +88,8 @@ private:
 
     std::vector<std::complex<double>> fractalPoints = { 0, 0, 0, 0 }; //to store the fractal points
 
-    std::vector<double> gains = { 0, 0, 0, 0 };
-    std::vector<double> freqs = { 0, 0, 0, 0 };
+    std::vector<double> lfoRates = { 3, 3, 3, 3 };
+    std::vector<double> freqDetunes = { 1, 2, 3, 4 };
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParams();
 
@@ -105,10 +105,10 @@ private:
 
     void generateFractalSuccession(std::complex<double> c);
 
-    void generateGains(std::vector<std::complex<double>> fractalSuccession);
+    void generateLFORates(std::vector<std::complex<double>> fractalSuccession);
 
 
-    void generateFreqs(std::vector<std::complex<double>> fractalSuccession);
+    void generateFreqDetunes(std::vector<std::complex<double>> fractalSuccession);
 
     void updateADSR(int partialIndex, SynthVoice* voice);
 

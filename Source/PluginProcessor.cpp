@@ -28,26 +28,7 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
     //Create synth voices
 
     //voicesNumber voices for each synth (allows voicesNumber MIDI notes to be played at the same time)
-    //First synth will play always the fundamental
-    //Second synth will play the 2nd harmonic and so on
-
-
-    //Create synths
-
-    /*
-    for (size_t order = 0; order < partialsNumber; order++)
-    {
-        juce::Synthesiser* synth = new juce::Synthesiser(); //create synth
-        synth->addSound(new SynthSound()); //add SynthSound (only one)
-        //Add 4 voices at same harmonic order (order+1)
-        for (size_t voice = 0; voice < voicesNumber; voice++)
-        {
-            synth->addVoice(new SynthVoice(order+1));
-        }
-        synths.push_back(synth); //Add current synth
-    }
-
-    */
+  
     synth = new juce::Synthesiser();
     synth->addSound(new SynthSound());
     
@@ -96,17 +77,11 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
     apvts.addParameterListener("WAVE_TYPE3", this);
 
 
-    /*
-    waveViewer.setRepaintRate(30);
-    waveViewer.setBufferSize(256);
-    */
-
 }
 
 FractalSynthesisAudioProcessor::~FractalSynthesisAudioProcessor()
 {
-    //synths.clear();
-    
+
 }
 
 //==============================================================================
@@ -261,9 +236,9 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
         generateFractalSuccession(c);
 
-        generateGains(fractalPoints);
+        generateLFORates(fractalPoints);
 
-        generateFreqs(fractalPoints);
+        generateFreqDetunes(fractalPoints);
 
         updatedFractal = false;
     }
@@ -284,24 +259,11 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     for (size_t j = 0; j < NUM_PARTIALS; j++)
                     {
                         updateADSR(j, voice);
-                        //I read the buffers for the visualiser here, not completely sure why
+                        //Push current voice and partial buffer to wave visualizer
                         waveVisualisers[j]->pushBuffer(*voice->synthBuffers[j]);
                     }
-
-
-                    //As an example, use X to control frequency detune and Y to control amplitude
-
-                    //Of course we need to take the absolute value if we use it to control frequency detuning or amplitude
-
-                    //get the n-th element of the fractal generated succession
-                    //double gain = gains[n];
-                    //voice->setLFOParams(10 * gain, 0.5f);
-                    //if (n > 0)
-                    //    voice->setHarmonicN(std::abs(fractalPoints[n].real()));
-                    //voice->setPan(fractalPoint.imag()/20);
-
-                    voice->setFreqDetunes(freqs);
-                    voice->setLFORates(gains);
+                    voice->setFreqDetunes(freqDetunes);
+                    voice->setLFORates(lfoRates);
                     
                 }
                
@@ -505,7 +467,7 @@ void FractalSynthesisAudioProcessor::generateFractalSuccession(std::complex<doub
     }
 }
 
-void FractalSynthesisAudioProcessor::generateGains(std::vector<std::complex<double>> fractalSuccession)
+void FractalSynthesisAudioProcessor::generateLFORates(std::vector<std::complex<double>> fractalSuccession)
 {
 
     double total = 0;
@@ -515,18 +477,19 @@ void FractalSynthesisAudioProcessor::generateGains(std::vector<std::complex<doub
 
     for (size_t i = 0; i < fractalSuccession.size(); i++)
     {
-        gains[i] = std::abs(fractalSuccession[i].imag()) * 10 / total; //i put a 10 here because i'm not using them as gains right now, be careful
+        lfoRates[i] = std::abs(fractalSuccession[i].imag()) * 10 / total;
     }
 
 
 }
 
-void FractalSynthesisAudioProcessor::generateFreqs(std::vector<std::complex<double>> fractalSuccession)
+void FractalSynthesisAudioProcessor::generateFreqDetunes(std::vector<std::complex<double>> fractalSuccession)
 {
 
-    for (size_t i = 0; i < fractalSuccession.size(); i++)
+    freqDetunes[0] = 1; //Always keep the fundamental unchanged
+    for (size_t i = 1; i < fractalSuccession.size(); i++)
     {
-        freqs[i] = std::abs(fractalSuccession[i].real());
+        freqDetunes[i] = std::abs(fractalSuccession[i].real());
     }
 }
 
