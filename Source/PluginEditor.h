@@ -72,6 +72,7 @@ private:
 
     juce::OwnedArray<juce::ComboBox> waveTypeComboBoxes;
 
+
     //juce::OwnedArray<juce::ComboBox> waveVisualizerBoxes;
 
 
@@ -108,6 +109,10 @@ private:
     juce::Rectangle<int> osc3Area;
     juce::Rectangle<int> osc4Area;
     juce::Rectangle<int> fractalArea;
+    juce::Rectangle<int> inputPlaneArea;
+    juce::Rectangle<int> initialPointXSliderArea;
+    juce::Rectangle<int> initialPointYSliderArea;
+    
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FractalSynthesisAudioProcessorEditor)

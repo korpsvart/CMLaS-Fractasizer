@@ -37,7 +37,6 @@ void InputPlane::paint(juce::Graphics& g)
 
     g.drawEllipse(x, y, 5, 5, 1);
 
-
 }
 
 void InputPlane::resized()

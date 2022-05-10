@@ -47,7 +47,8 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
         setSliderStyle(sustainSliders[i]);
         setSliderStyle(releaseSliders[i]);
 
-
+       
+        //attackLabels[i]->setBorderSize(3);
         attackLabels[i]->setText("Attack", juce::dontSendNotification);
         attackLabels[i]->setJustificationType(juce::Justification::centred);
         attackLabels[i]->attachToComponent(attackSliders[i], false);
@@ -55,7 +56,6 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
         decayLabels[i]->setText("Decay", juce::dontSendNotification);
         decayLabels[i]->setJustificationType(juce::Justification::centred);
         decayLabels[i]->attachToComponent(decaySliders[i], false);
-
 
         sustainLabels[i]->setText("Sustain", juce::dontSendNotification);
         sustainLabels[i]->setJustificationType(juce::Justification::centred);
@@ -146,18 +146,27 @@ FractalSynthesisAudioProcessorEditor::~FractalSynthesisAudioProcessorEditor()
 void FractalSynthesisAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    //g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     g.setOpacity(0.4);
+    g.setColour(juce::Colours::floralwhite);
+
+    //rectangles around sliders and inputPlane
+    g.drawRoundedRectangle(initialPointXSliderArea.toFloat().reduced(15), 5.0f, 4.0f);
+    g.drawRoundedRectangle(initialPointYSliderArea.toFloat().reduced(15), 5.0f, 4.0f);
+    g.drawRoundedRectangle(inputPlaneArea.toFloat().reduced(15), 5.0f, 4.0f);
+
+    //background images
     g.drawImageWithin(currentImage, 0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight(),
         juce::RectanglePlacement::fillDestination);
 
-
+ 
 
     g.setColour(juce::Colours::floralwhite);
     g.setOpacity(0.8);
     g.drawRoundedRectangle(osc1Area.toFloat().reduced(15), 5.0f, 4.0f);
     g.drawText("OSC 1", osc1Area.toFloat().removeFromTop(10), juce::Justification::left);
+    
 
     g.drawRoundedRectangle(osc2Area.toFloat().reduced(15), 5.0f, 4.0f);
     g.drawText("OSC 2", osc2Area.toFloat().removeFromTop(10), juce::Justification::left);
@@ -168,6 +177,7 @@ void FractalSynthesisAudioProcessorEditor::paint (juce::Graphics& g)
     g.drawRoundedRectangle(osc4Area.toFloat().reduced(15), 5.0f, 4.0f);
     g.drawText("OSC 4", osc4Area.toFloat().removeFromTop(10), juce::Justification::left);
 
+    g.drawRect(inputPlaneComponent.getX(), inputPlaneComponent.getY(), inputPlaneComponent.getWidth(), inputPlaneComponent.getHeight());
 
 
 }
@@ -195,10 +205,15 @@ void FractalSynthesisAudioProcessorEditor::resized()
     buildOscSubArea(3, osc4Area);
 
     fractalFunctionComboBox.setBounds(fractalArea.removeFromLeft(fractalArea.getWidth()/3).reduced(5));
-    inputPlaneComponent.setBounds(fractalArea.removeFromLeft(fractalArea.getWidth()/2).reduced(5));
+
+    auto inputPlaneArea= fractalArea.removeFromLeft(fractalArea.getWidth() / 2).reduced(5);
+    inputPlaneComponent.setBounds(inputPlaneArea);
    
-    initialPointXSlider.setBounds(fractalArea.removeFromTop(fractalArea.getHeight()/2).reduced(5));
-    initialPointYSlider.setBounds(fractalArea.reduced(5));
+    auto initialPointXSliderArea = (fractalArea.removeFromTop(fractalArea.getHeight() / 2).reduced(5));
+    initialPointXSlider.setBounds(initialPointXSliderArea);
+
+    auto initialPointYSliderArea = (fractalArea.reduced(5));
+    initialPointYSlider.setBounds(initialPointYSliderArea);
     
  
 
@@ -257,6 +272,7 @@ void FractalSynthesisAudioProcessorEditor::buildOscSubArea(int index, juce::Rect
 
     waveTypeComboBoxes[index]->setBounds(oscWaveTypeArea);
     audioProcessor.waveVisualisers[index]->setBounds(oscWaveVisualizerArea);
+    
 }
 
 
