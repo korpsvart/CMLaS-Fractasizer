@@ -25,15 +25,7 @@ The available fractals to use are three:
 * Mandelbrot
 * Burning Ship
 * Tricorn7
-#
-## 2. Instructions
-Download the zip folder, open the jucer file with JUCE.
 
-You might have to adjust modules paths according to the correct ones from your JUCE folder.
-
-Open the project in you IDE and compile it.
-
-Then it will be ready to be opened in your AudioPluginHost.
 #
 ## 3. GUI
 ### Single partials area
