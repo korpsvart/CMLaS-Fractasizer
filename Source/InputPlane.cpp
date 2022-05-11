@@ -70,6 +70,12 @@ void InputPlane::mouseDown(const juce::MouseEvent& event)
 
 void InputPlane::sliderValueChanged(juce::Slider* slider)
 {
+
+    if (sliderX.getValue() == 0 && sliderY.getValue() == 0)
+    {
+        //Set to 0.01 to avoid errors due to zero frequencies
+        slider->setValue(0.01);
+    }
     repaint();
 }
 

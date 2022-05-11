@@ -226,7 +226,6 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         auto& startingY = *apvts.getRawParameterValue("INITIAL_POINT_Y");
 
 
-
         float x = startingX.load();
         float y = startingY.load();
 
@@ -348,6 +347,7 @@ void FractalSynthesisAudioProcessor::parameterChanged(const juce::String& parame
             }
         }
     }
+
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout FractalSynthesisAudioProcessor::createParams()
@@ -451,7 +451,7 @@ std::complex<double> FractalSynthesisAudioProcessor::burningShip(std::complex<do
 
 std::complex<double> FractalSynthesisAudioProcessor::tricorn(std::complex<double> z, std::complex<double> c)
 {
-    return std::conj(pow(z, 2)) + c;
+    return pow(conj(z), 2) + c;
 }
 
 
