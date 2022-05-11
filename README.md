@@ -27,7 +27,7 @@ The available fractals to use are three:
 * Tricorn7
 
 #
-## 3. GUI
+## 2. GUI
 ### Single partials area
 * Waveform Combo Boxes: allows the user choose the partial waveform between:
      sine wave, saw wave, square wave.
