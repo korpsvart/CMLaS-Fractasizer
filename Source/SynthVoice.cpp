@@ -41,7 +41,6 @@ SynthVoice::SynthVoice(int numPartials)
         lfos[i].setFrequency(3); //just a default value
     }
 
-
     for (int i = 0; i < numPartials; ++i)
     {
 
@@ -57,8 +56,6 @@ SynthVoice::SynthVoice(int numPartials)
     {
         lfoDepths.push_back(0.5f);
     }
-
-
 
 }
 
@@ -230,15 +227,9 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 }
 
 
-void SynthVoice::setHarmonicN(float harmonicN)
-{
-
-    this->harmonicN = harmonicN;
-}
-
 void SynthVoice::setGain(float gainValue)
 {
-    //Not implemented for now
+    //Not implemented for the moment
 
 }
 

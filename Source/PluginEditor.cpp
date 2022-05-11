@@ -39,7 +39,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
 
 
 
-    for (size_t i = 0; i < 4; i++)
+    for (size_t i = 0; i < processor_consts::NUM_PARTIALS; i++)
     {
 
         attackSliders.add(new juce::Slider());
@@ -100,9 +100,6 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     }
 
 
-
-
-
     fractalComboBoxAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, "FRACTAL_FUNCTION", fractalFunctionComboBox);
 
 
@@ -130,7 +127,7 @@ FractalSynthesisAudioProcessorEditor::FractalSynthesisAudioProcessorEditor (Frac
     addAndMakeVisible(initialPointYSlider);
 
 
-    for (size_t i = 0; i < 4; i++)
+    for (size_t i = 0; i < processor_consts::NUM_PARTIALS; i++)
     {
         addAndMakeVisible(attackSliders[i]);
 
@@ -189,7 +186,7 @@ void FractalSynthesisAudioProcessorEditor::paint (juce::Graphics& g)
 
 
     g.setColour(juce::Colours::darkorange);
-    for (size_t i = 0; i < 4; i++)
+    for (size_t i = 0; i < processor_consts::NUM_PARTIALS; i++)
     {
         g.drawRoundedRectangle(audioProcessor.waveVisualisers[i]->getBounds().expanded(3).toFloat(), 5.0f, 2.0f);
     }
@@ -220,9 +217,6 @@ void FractalSynthesisAudioProcessorEditor::resized()
     buildOscSubArea(3, osc4Area);
 
     buildFractalArea(fractalArea);
-
-    
- 
 
 }
 
@@ -286,10 +280,10 @@ void FractalSynthesisAudioProcessorEditor::buildFractalArea(juce::Rectangle<int>
     auto comboBoxArea = tempBounds.removeFromTop(tempBounds.getHeight() * 0.33).reduced(5);
     fractalFunctionComboBox.setBounds(comboBoxArea);
 
-    initialPointXSliderArea = (tempBounds.removeFromTop(tempBounds.getHeight() * 0.5).reduced(5));
+    auto initialPointXSliderArea = (tempBounds.removeFromTop(tempBounds.getHeight() * 0.5).reduced(5));
     initialPointXSlider.setBounds(initialPointXSliderArea.reduced(5));
 
-    initialPointYSliderArea = (tempBounds.reduced(5));
+    auto initialPointYSliderArea = (tempBounds.reduced(5));
     initialPointYSlider.setBounds(initialPointYSliderArea.reduced(5));
 
 }

@@ -12,6 +12,14 @@
 #include "SynthVoice.h"
 
 
+namespace processor_consts
+{
+    //number of partials to generate for additive synthesis
+    static constexpr int NUM_PARTIALS = 4;
+    //Define the number of polyphonies (max number of MIDI notes that can be played at the same time)
+    static constexpr int NUM_VOICES = 10;
+}
+
 //==============================================================================
 /**
 */
@@ -58,7 +66,9 @@ public:
 
     void parameterChanged(const juce::String& parameterID, float newValue) override;
 
-    static const int NUM_PARTIALS = 4;
+
+
+
 
 
     juce::AudioProcessorValueTreeState apvts;
@@ -73,50 +83,38 @@ private:
     //Synth variables
 
 
-    //number of partials to generate for additive synthesis, will correspond to number of synths
-
-
-
-    //Define the number of polyphonies (max number of MIDI notes that can be played at the same time)
-    //Should be constant during the execution
-    static const int voicesNumber = 10;
 
     std::vector<juce::Synthesiser*> synths;
 
     juce::Synthesiser* synth;
 
-
     std::vector<std::complex<double>> fractalPoints = { 0, 0, 0, 0 }; //to store the fractal points
 
-    std::vector<double> lfoRates = { 3, 3, 3, 3 };
-    std::vector<double> freqDetunes = { 1, 2, 3, 4 };
+    std::vector<double> lfoRates = { 3, 3, 3, 3 }; //Hz, default values
+    std::vector<double> freqDetunes = { 1, 2, 3, 4 }; //default values
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParams();
 
 
-
+    //static utility functions for fractal computation
     static std::complex<double> mandelbrot(std::complex<double> z, std::complex<double> c);
 
     static std::complex<double> burningShip(std::complex<double> z, std::complex<double> c);
     
     static std::complex<double> tricorn(std::complex<double> z, std::complex<double> c);
 
-    std::complex<double>(*currentFractal)(std::complex<double> z, std::complex<double> c) = mandelbrot;
+    std::complex<double>(*currentFractal)(std::complex<double> z, std::complex<double> c) = mandelbrot; //default fractal
 
     void generateFractalSuccession(std::complex<double> c);
 
     void generateLFORates(std::vector<std::complex<double>> fractalSuccession);
-
 
     void generateFreqDetunes(std::vector<std::complex<double>> fractalSuccession);
 
     void updateADSR(int partialIndex, SynthVoice* voice);
 
 
-
-    bool updatedFractal = true;
-   
-
+    bool updatedFractal = true; //defaults to true to start up the first computation
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FractalSynthesisAudioProcessor)

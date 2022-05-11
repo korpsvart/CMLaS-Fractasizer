@@ -27,39 +27,30 @@ FractalSynthesisAudioProcessor::FractalSynthesisAudioProcessor()
 
     //Create synth voices
 
-    //voicesNumber voices for each synth (allows voicesNumber MIDI notes to be played at the same time)
+    //add voicesNumber voices to the synth (allows voicesNumber MIDI notes to be played at the same time)
   
     synth = new juce::Synthesiser();
     synth->addSound(new SynthSound());
     
-    //Create the visualiter components and add them to ownedArray
-    waveVisualisers.add(new juce::AudioVisualiserComponent(1));
-    waveVisualisers.add(new juce::AudioVisualiserComponent(1));
-    waveVisualisers.add(new juce::AudioVisualiserComponent(1));
-    waveVisualisers.add(new juce::AudioVisualiserComponent(1));
-    
-    for (size_t voice = 0; voice < voicesNumber; voice++)
+    for (size_t voice = 0; voice < processor_consts::NUM_VOICES; voice++)
     {
-        synth->addVoice(new SynthVoice(NUM_PARTIALS));
+        synth->addVoice(new SynthVoice(processor_consts::NUM_PARTIALS));
 
     }
 
-
-    //set properties
-    for (size_t i = 0; i < NUM_PARTIALS; i++)
+    //Create and init wave visualizers
+    for (size_t i = 0; i < processor_consts::NUM_PARTIALS; i++)
     {
-        waveVisualisers[i]->setBufferSize(512);
-        waveVisualisers[i]->setSamplesPerBlock(256);
-        waveVisualisers[i]->setRepaintRate(30);
-        waveVisualisers[i]->setColours(juce::Colours::black, juce::Colours::deepskyblue);
+        auto waveVis = new juce::AudioVisualiserComponent(1);
+        waveVis->setBufferSize(512);
+        waveVis->setSamplesPerBlock(256);
+        waveVis->setRepaintRate(30);
+        waveVis->setColours(juce::Colours::black, juce::Colours::deepskyblue);
+        waveVisualisers.add(waveVis);
     }
-
-
-    //TODO: refactoring to correctly free memory
-
 
     //Add this as listener to the fractal params
-    //(usually this is not needed when working with attachments,
+    //(usually this is not needed when working with apvts and attachments,
     //but for performance reasons we don't want to recompute
     //the fractal succession all the time)
     apvts.addParameterListener("FRACTAL_FUNCTION", this);
@@ -153,15 +144,17 @@ void FractalSynthesisAudioProcessor::prepareToPlay (double sampleRate, int sampl
     // initialisation that you need..
 
 
-        for (int i = 0; i < synth->getNumVoices(); i++)
-        {
-            if (auto voice = dynamic_cast<SynthVoice*>(synth->getVoice(i)))
-            {
-                voice->prepareToPlay(sampleRate, samplesPerBlock, getTotalNumOutputChannels());
-            }
+    //Prepare all the voices inside the synth
 
+    for (int i = 0; i < synth->getNumVoices(); i++)
+    {
+        if (auto voice = dynamic_cast<SynthVoice*>(synth->getVoice(i)))
+        {
+            voice->prepareToPlay(sampleRate, samplesPerBlock, getTotalNumOutputChannels());
         }
-        synth->setCurrentPlaybackSampleRate(sampleRate);
+
+    }
+    synth->setCurrentPlaybackSampleRate(sampleRate);
 
 }
 
@@ -169,8 +162,8 @@ void FractalSynthesisAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
-        synth->clearSounds();
-        synth->clearVoices();
+    synth->clearSounds();
+    synth->clearVoices();
   
 }
 
@@ -231,8 +224,6 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
         c = std::complex<double>(x, y);
 
-
-
         generateFractalSuccession(c);
 
         generateLFORates(fractalPoints);
@@ -243,37 +234,32 @@ void FractalSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     }
 
 
-            for (int i = 0; i < synth->getNumVoices(); ++i)
+    for (int i = 0; i < synth->getNumVoices(); ++i)
+    {
+        
+        if (auto voice = dynamic_cast<SynthVoice*>(synth->getVoice(i)))
+        {
+            // Osc controls
+            // ADSR
+            // LFO ecc...
+
+            for (size_t j = 0; j < processor_consts::NUM_PARTIALS; j++)
             {
-                
-
-                if (auto voice = dynamic_cast<SynthVoice*>(synth->getVoice(i)))
-                {
-                    // Osc controls
-                    // ADSR
-                    // LFO ecc...
-
-
-
-                    for (size_t j = 0; j < NUM_PARTIALS; j++)
-                    {
-                        updateADSR(j, voice);
-                        //Push current voice and partial buffer to wave visualizer
-                        waveVisualisers[j]->pushBuffer(*voice->synthBuffers[j]);
-                    }
-                    voice->setFreqDetunes(freqDetunes);
-                    voice->setLFORates(lfoRates);
-                    
-                }
-               
-            
+                updateADSR(j, voice);
+                //Push current voice and partial buffer to wave visualizer
+                waveVisualisers[j]->pushBuffer(*voice->synthBuffers[j]);
             }
+            voice->setFreqDetunes(freqDetunes);
+            voice->setLFORates(lfoRates);
+            
+        }
+    
+    }
   
-        synth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    synth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
 
     midiMessages.clear();
-    //waveViewer.pushBuffer(buffer);
 }
 
 //==============================================================================
@@ -460,7 +446,7 @@ void FractalSynthesisAudioProcessor::generateFractalSuccession(std::complex<doub
 
     std::complex<double> z = 0; //starting z
 
-    for (size_t synthNumber = 0; synthNumber < NUM_PARTIALS; synthNumber++)
+    for (size_t synthNumber = 0; synthNumber < processor_consts::NUM_PARTIALS; synthNumber++)
     {
         z = currentFractal(z, c);
         fractalPoints[synthNumber] = z;
@@ -503,8 +489,6 @@ void FractalSynthesisAudioProcessor::updateADSR(int partialIndex, SynthVoice* vo
     auto& release = *apvts.getRawParameterValue("RELEASE" + indexString);
 
     voice->updateADSR(partialIndex, attack.load(), decay.load(), sustain.load(), release.load());
-
-
 }
 
 

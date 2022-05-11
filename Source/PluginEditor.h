@@ -89,15 +89,15 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderInitialPointYAttachment;
 
 
-    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, 4> attackAttachments;
+    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, processor_consts::NUM_PARTIALS> attackAttachments;
 
-    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, 4> decayAttachments;
+    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, processor_consts::NUM_PARTIALS> decayAttachments;
 
-    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, 4> sustainAttachments;
+    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, processor_consts::NUM_PARTIALS> sustainAttachments;
 
-    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, 4> releaseAttachments;
+    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>, processor_consts::NUM_PARTIALS> releaseAttachments;
 
-    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment>, 4> waveTypeAttachments;
+    std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment>, processor_consts::NUM_PARTIALS> waveTypeAttachments;
     
 
     juce::Rectangle<int> osc1Area;
@@ -106,8 +106,6 @@ private:
     juce::Rectangle<int> osc4Area;
     juce::Rectangle<int> fractalArea;
     juce::Rectangle<int> inputPlaneArea;
-    juce::Rectangle<int> initialPointXSliderArea;
-    juce::Rectangle<int> initialPointYSliderArea;
     
 
 

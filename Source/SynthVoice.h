@@ -31,10 +31,7 @@ public:
 
     void renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override;
 
-
     void prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannelsNumber);
-
-    void setHarmonicN(float harmonicN);
 
     void setGain(float gainValue);
 
@@ -49,19 +46,18 @@ public:
     void updateADSR(int i, const float attack, const float decay, const float sustain, const float release);
 
 
-    enum Pippo
+    enum chainElements
     {
         oscIndex,
         gainIndex,
         panIndex
     };
 
-
     void setWaveType(const int partialIndex, const int choice);
 
     void applyLFO(int i);
     
-    //had to make this buffer public to be able to access in the processor. 
+    //Public to be able to access it in the plugin processor
     juce::OwnedArray<juce::AudioBuffer<float>> synthBuffers; //Local buffers to temporarily store synth output (one for each partial)
 
 private:
@@ -79,12 +75,6 @@ private:
 
     std::vector<juce::ADSR> adsr;
     std::vector<juce::ADSR::Parameters> adsrParams;
-    //juce::OwnedArray<juce::AudioBuffer<float>> synthBuffers; //Local buffers to temporarily store synth output (one for each partial)
-
-
-
-    //Oscillator variables
-    //juce::dsp::Oscillator<float> osc{ [](float x) { return std::sin(x); } };
 
     std::vector < juce::dsp::Oscillator<float>> lfos;
 
@@ -92,26 +82,13 @@ private:
     std::vector<float> lfoRates;
     std::vector<float> lfoDepths;
 
-
-
-    //float lfoRate = 3.0f; //Hz, how fast the lfo oscillates
-    //float lfoDepth = 0.5f; //Depends on what you want to control
-    
     static constexpr size_t lfoUpdateRate = 100;
     
     size_t lfoUpdateCounter = lfoUpdateRate;
-    
-    //juce::dsp::Gain<float> gain;
 
     std::vector<float> fixedGains;
 
-    //juce::dsp::Panner<float> panner;
-
-
-    float harmonicN = 1; //Identifies the order of this oscillator harmonic (this will be multiplied by the given frequency)
-
-
-    std::vector<float> detuneFactors; //default is harmonic
+    std::vector<float> detuneFactors;
 
     bool isPrepared = false;
 

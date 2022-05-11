@@ -37,9 +37,4 @@ private:
     juce::Slider& sliderX;
     juce::Slider& sliderY;
 
-    float currentX = 0.5f;
-    float currentY = 0.5f;
-
-
-
 };
